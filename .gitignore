@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Specific to me
+Builds
+JuceLibraryCode
+*.latex
+*.pdf
+*.DS_Store
