@@ -8,6 +8,8 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "GrainDelay.h"
+#include "CustomFunctions.h"
 
 //==============================================================================
 TabboulehAudioProcessor::TabboulehAudioProcessor()

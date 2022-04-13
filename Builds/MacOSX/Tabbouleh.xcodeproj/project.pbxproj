@@ -91,6 +91,7 @@
 		539288FA332438F400D669BC /* Info-VST3.plist */ /* Info-VST3.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-VST3.plist"; path = "Info-VST3.plist"; sourceTree = SOURCE_ROOT; };
 		5644BB0A316482D707BC58B4 /* Cocoa.framework */ /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		6079C8DA4668FDD58A7F9B01 /* juce_audio_utils */ /* juce_audio_utils */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_utils; path = /Applications/JUCE/modules/juce_audio_utils; sourceTree = "<absolute>"; };
+		6714D8731897A99C025F6140 /* GrainDelay.h */ /* GrainDelay.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GrainDelay.h; path = ../../Source/GrainDelay.h; sourceTree = SOURCE_ROOT; };
 		69B1230E626616A355D7B3E2 /* include_juce_audio_plugin_client_VST_utils.mm */ /* include_juce_audio_plugin_client_VST_utils.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_plugin_client_VST_utils.mm; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_VST_utils.mm; sourceTree = SOURCE_ROOT; };
 		6E6C6CC5553D12E07F255A65 /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = /Applications/JUCE/modules/juce_audio_devices; sourceTree = "<absolute>"; };
 		72E6EF520563CBF78F49529B /* Info-Standalone_Plugin.plist */ /* Info-Standalone_Plugin.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-Standalone_Plugin.plist"; path = "Info-Standalone_Plugin.plist"; sourceTree = SOURCE_ROOT; };
@@ -110,6 +111,7 @@
 		AC10371A356AED9E5FAB509E /* Info-AAX.plist */ /* Info-AAX.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-AAX.plist"; path = "Info-AAX.plist"; sourceTree = SOURCE_ROOT; };
 		B35219356A29F18B7534365D /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		B563DC90A1F2F9B9EFE7A873 /* Foundation.framework */ /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		B9D7790B6E0D54CA7D16213A /* CustomFunctions.h */ /* CustomFunctions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CustomFunctions.h; path = ../../Source/CustomFunctions.h; sourceTree = SOURCE_ROOT; };
 		BC25973289A13E42B8DFFE65 /* AU */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tabbouleh.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCC0589594F2F4AEDFAEADD5 /* Accelerate.framework */ /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		C4E003E9B52EDCAFC4485449 /* AAX */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Tabbouleh.aaxplugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -283,6 +285,8 @@
 				D5A0E3CAEB76BF7E6BD4A94E,
 				17BD0ED0B7F11040F26A644A,
 				DA57378EAE47021E299A9E4C,
+				6714D8731897A99C025F6140,
+				B9D7790B6E0D54CA7D16213A,
 			);
 			name = Source;
 			sourceTree = "<group>";
