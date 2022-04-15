@@ -20,7 +20,7 @@ public:
      @param _maxDelayTime maximum length of buffers in seconds
      @param _sampleRate sample rate
      */
-    void initialiseGrainDelay(int _maxDelayTime, int _sampleRate)
+    void initialise(int _maxDelayTime, int _sampleRate)
     {
         sampleRate = _sampleRate;
         maxSize = _maxDelayTime * _sampleRate;
@@ -37,9 +37,11 @@ public:
     ///Destructor
     ~GrainDelay()
     {
-        delete[] bufferL;
-        delete[] bufferL;
+        // If bufferL exists, delete it!
+        if (bufferL) delete[] bufferL;
+        if (bufferR) delete[] bufferR;
     }
+    
     
     /**
      Sets the size of the buffer
@@ -50,6 +52,7 @@ public:
     {
         currentSizeTemporary = floor (_currentSize * sampleRate);
     }
+    
     
     /**
      Writes in the Left and Right samples into their buffers
@@ -133,8 +136,8 @@ private:
     int oldWriteSize;
     int oldWriteSizeTemporary;
     int maxSize;
-    float* bufferL;
-    float* bufferR;
+    float* bufferL = nullptr;
+    float* bufferR = nullptr;
     int writePos = 0;
     int readPos[5] = {0, 0, 0, 0, 0};
     bool grainIsPlaying[5] = {false, false, false, false, false};
