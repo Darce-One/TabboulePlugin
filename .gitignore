@@ -1,42 +1,4 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Specific to me
-Builds
-JuceLibraryCode
-*.latex
-*.pdf
-*.DS_Store
+.DS_Store
 applet
 application.linux-arm64
 application.linux-armv6hf
@@ -46,3 +8,7 @@ application.windows32
 application.windows64
 application.macosx
 out
+Builds
+JuceLibraryCode
+*.latex
+*.pdf

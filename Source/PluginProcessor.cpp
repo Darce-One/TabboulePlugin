@@ -60,6 +60,7 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (int DSPiterator = 0; DSPiterator < buffer.getNumSamples(); DSPiterator++)
     {
         grainDelay.writeVal(leftChannelData[DSPiterator], rightChannelData[DSPiterator]);
+        
     }
         
     
