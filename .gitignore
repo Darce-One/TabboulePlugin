@@ -8,7 +8,7 @@ application.windows32
 application.windows64
 application.macosx
 out
-Builds
-JuceLibraryCode
+Builds/
+JuceLibraryCode/
 *.latex
 *.pdf
