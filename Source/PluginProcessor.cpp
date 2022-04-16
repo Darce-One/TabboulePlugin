@@ -33,7 +33,7 @@ void TabboulehAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    grainDelay.initialise(maxDelaySizeInSeconds, sampleRate);
+    grainBuffer.initialise(maxDelaySizeInSeconds, sampleRate);
     
 }
 
@@ -52,7 +52,7 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    grainDelay.setBufferSize(delaySizeInSeconds);
+    grainBuffer.setBufferSize(delaySizeInSeconds);
     auto* leftChannelData = buffer.getReadPointer(0);
     auto* rightChannelData = buffer.getReadPointer(1);
     
@@ -60,7 +60,7 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (int DSPiterator = 0; DSPiterator < buffer.getNumSamples(); DSPiterator++)
     {
         //Ensure the inputs are floats and not weird pointer things DONE
-        grainDelay.writeVal(leftChannelData[DSPiterator], rightChannelData[DSPiterator]);
+        grainBuffer.writeVal(leftChannelData[DSPiterator], rightChannelData[DSPiterator]);
         
     }
         

@@ -12,9 +12,12 @@
       <FILE id="FUxh6d" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="nr1jAH" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="mkOOqu" name="GrainDelay.h" compile="0" resource="0" file="Source/GrainDelay.h"/>
+      <FILE id="mkOOqu" name="GrainBuffer.h" compile="0" resource="0" file="Source/GrainBuffer.h"/>
       <FILE id="R2zQOp" name="CustomFunctions.h" compile="0" resource="0"
             file="Source/CustomFunctions.h"/>
+      <FILE id="YGjfgI" name="Grain.h" compile="0" resource="0" file="Source/Grain.h"/>
+      <FILE id="UZRt22" name="MyFilters.h" compile="0" resource="0" file="Source/MyFilters.h"/>
+      <FILE id="PP8Xl5" name="Oscillator.h" compile="0" resource="0" file="Source/Oscillator.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>

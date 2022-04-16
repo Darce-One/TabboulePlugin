@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    GrainDelay.h
+    GrainBuffer.h
     Created: 13 Apr 2022 11:05:09pm
     Author:  B162025
 
@@ -10,7 +10,7 @@
 
 #pragma once
 
-class GrainDelay
+class GrainBuffer
 {
 public:
 
@@ -35,7 +35,7 @@ public:
     }
     
     ///Destructor
-    ~GrainDelay()
+    ~GrainBuffer()
     {
         // If bufferL exists, delete it!
         if (bufferL) delete[] bufferL;
@@ -82,50 +82,25 @@ public:
     /**
      Reads the LEFT sample at the reading position of the specified grain.
      
-     This function also increments the readPos as necessary, and therefore should be called BEFORE readValR().
-     
      @param index The reading position index [0-4]
      @return sample value at reading position
      */
     float readValL(int index)
     {
-        if (readPos[index] >= oldWriteSize || readPos[index] >= maxSize)
-        {
-            readPos[index] = 0;
-            // Must ensure that the current size used here (oldWriteSize) is the old write size as to ensure that
-            // the samples at the turnaround follow each other. We must also make sure that the old write size is
-            // not overwritten
-            oldWriteSize = oldWriteSizeTemporary;
-        }
-        
-        return bufferL[readPos[index]];
-        readPos[index]++;
+        return bufferL[readPos];
     }
     
     /**
      Reads the RIGHT sample at the reading position of the specified grain.
-     
-     This function does not increment the readPos, and must be called AFTER readValL().
      
      @param index The reading position index [0-4]
      @return sample value at reading position
      */
     float readValR(int index)
     {
-        return bufferR[readPos[index]];
-        readPos[index]++;
+        return bufferR[readPos];
     }
     
-    
-    float processGrain(int index, float grainSizeInSeconds)
-    {
-        if(!grainIsPlaying[index])
-        {
-            grainIsPlaying[index] = true;
-            int grainSizeInSamples = grainSizeInSeconds * sampleRate;
-            
-        }
-    }
     
     
 private:
@@ -139,7 +114,7 @@ private:
     float* bufferL = nullptr;
     float* bufferR = nullptr;
     int writePos = 0;
-    int readPos[5] = {0, 0, 0, 0, 0};
-    bool grainIsPlaying[5] = {false, false, false, false, false};
-    juce::Random random;
+    int readPos = 0;
 };
+
+

@@ -9,8 +9,9 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "GrainDelay.h"
+#include "GrainBuffer.h"
 #include "CustomFunctions.h"
+#include "Grain.h"
 
 //==============================================================================
 /**
@@ -59,7 +60,7 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabboulehAudioProcessor)
     
-    GrainDelay grainDelay;
+    GrainBuffer grainBuffer;
     float maxDelaySizeInSeconds = 5.0f;
     float delaySizeInSeconds = 1.0f;
     int sampleRate;
