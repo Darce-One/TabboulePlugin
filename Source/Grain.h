@@ -12,17 +12,62 @@
 #include "Oscillator.h"
 
 
+/**
+ Grain is an object representing a grain in a granulation.
+ The Grain class is meant to be used in conjunction with the GrainBuffer class, where the buffer is stored
+ The Grain object is driven by a phasor whose period represents the grain size.
+ When a grain is done playing (Phasor resets), it looks gets the new MaxReadPos from the grainBuffer instance, and moves the readPos to a new location.
+ */
 class Grain
 {
 public:
     
+    /**
+     Constructor, sets the sample rate
+     
+     @param _sampleRate Sample rate
+     */
     Grain(int _sampleRate)
     {
         sampleRate = _sampleRate;
-        
+        triOscillator.setSampleRate(sampleRate);
     }
     
+    float getReadPos()
+    {
+        return readPos;
+    }
     
+    void process(int _grainMaxReadPos, float _grainRandomisation, float _shape)
+    {
+        sampleEnvelope = std::max(_shape * triOscillator.process(), 1.0f);
+        readPos++;
+        timeToReset = triOscillator.newCycleStarted();
+        
+        if (readPos >= maxReadPos)
+            readPos = 0;
+        
+        if (timeToReset == true)
+        {
+            maxReadPos = _grainMaxReadPos;
+            readPos = readPos + floor((random.nextFloat()-0.5f) * maxReadPos * _grainRandomisation);
+        }
+    }
+    
+    float getSampleEnvelope()
+    {
+        return sampleEnvelope;
+    }
+    
+    void setGrainPeriod(float grainPeriod)
+    {
+        triOscillator.setFrequency(1.0f/grainPeriod);
+    }
+    
+    void setGrainPhase(float phase)
+    {
+        triOscillator.setPhase(phase);
+    }
     
     
     
@@ -30,5 +75,9 @@ public:
 private:
     int sampleRate;
     juce::Random random;
-    Phasor phasor;
+    TriOsc triOscillator;
+    int readPos = 0;
+    bool timeToReset = false;
+    int maxReadPos = 4410;
+    float sampleEnvelope;
 };

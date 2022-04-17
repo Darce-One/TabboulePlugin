@@ -62,21 +62,21 @@ public:
      */
     void writeVal(float inputSampleL, float inputSampleR)
     {
+        writePos++;
+        
         if (writePos >= currentWriteSize || writePos >= maxSize)
         {
             writePos = 0;
             // Must insure that the current size used here only changes when the
             // write position is reset to ensure no gaps in playback
-            oldWriteSizeTemporary = currentWriteSize;
+            maxReadPos = currentWriteSize;
             currentWriteSize = currentSizeTemporary;
-            
-            if (currentWriteSize == oldWriteSizeTemporary)
-                oldWriteSize = currentWriteSize;
+
         }
         
         bufferL[writePos] = inputSampleL;
         bufferR[writePos] = inputSampleR;
-        writePos++;
+        
     }
     
     /**
@@ -101,6 +101,10 @@ public:
         return bufferR[readPos];
     }
     
+    float getMaxReadPos()
+    {
+        return maxReadPos;
+    }
     
     
 private:
@@ -109,7 +113,7 @@ private:
     int currentWriteSize;
     int currentSizeTemporary;
     int oldWriteSize;
-    int oldWriteSizeTemporary;
+    int maxReadPos;
     int maxSize;
     float* bufferL = nullptr;
     float* bufferR = nullptr;
