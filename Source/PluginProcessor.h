@@ -12,6 +12,8 @@
 #include "GrainBuffer.h"
 #include "CustomFunctions.h"
 #include "Grain.h"
+#include "MyFilters.h"
+#include <vector>
 
 //==============================================================================
 /**
@@ -64,4 +66,9 @@ private:
     float maxDelaySizeInSeconds = 5.0f;
     float delaySizeInSeconds = 1.0f;
     int sampleRate;
+    
+    GrainManager grainManager;
+    
+    std::vector<Grain> grains;
+    int maxGrainCount = 5;
 };

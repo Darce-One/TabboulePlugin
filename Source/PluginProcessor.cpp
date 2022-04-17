@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <vector>
 
 //==============================================================================
 TabboulehAudioProcessor::TabboulehAudioProcessor()
@@ -29,12 +30,19 @@ TabboulehAudioProcessor::~TabboulehAudioProcessor()
 }
 
 //==============================================================================
-void TabboulehAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    grainBuffer.initialise(maxDelaySizeInSeconds, sampleRate);
+    // Save sampleRate as a parameter for future use.
+    sampleRate = _sampleRate;
     
+    // Initialise the Grain Buffer instance:
+    grainBuffer.initialise(maxDelaySizeInSeconds, _sampleRate);
+    
+    // Initialise the grain intances:
+    for (int i=0; i<maxGrainCount; i++)
+    {
+        grains.push_back(Grain(sampleRate));
+    }
 }
 
 void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
