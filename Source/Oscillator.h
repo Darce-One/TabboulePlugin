@@ -1,12 +1,14 @@
-//
-//  Oscillator.h test
-//  Functions and classes challenges
-//
-//  Created by Andreas Papaeracleous on 28/02/2022.
-//
+/*
+  ==============================================================================
 
-#ifndef Oscillator_h
-#define Oscillator_h
+    Oscillator.h
+    Created: 16 Apr 2022 5:42:07pm
+    Author:  B162025
+
+  ==============================================================================
+*/
+
+#pragma once
 #include <cmath>
 
 
@@ -19,13 +21,6 @@
  */
 class Phasor
 {
-private:
-    float sampleRate = 44100.0f;
-    float phase = 0.0f;
-    float phaseDelta;
-    float frequency;
-    bool newCycle = true;
-    
 public:
     
     virtual ~Phasor() {}
@@ -82,8 +77,17 @@ public:
         ///returns true at every new phase cycle;
         return newCycle;
     }
+    
+    //==========================================================================
+private:
+    float sampleRate = 44100.0f;
+    float phase = 0.0f;
+    float phaseDelta;
+    float frequency;
+    bool newCycle = true;
 };
 
+//==============================================================================
 /**
  Creates a triangle oscillator instance.
  The process() method must be run once (and only once) at every sample.
@@ -96,6 +100,7 @@ class TriOsc : public Phasor
     }
 };
 
+//==============================================================================
 /**
  Creates a sine oscillator instance.
  The process() method must be run once (and only once) at every sample.
@@ -108,6 +113,7 @@ class SineOsc : public Phasor
     }
 };
 
+//==============================================================================
 /**
  Creates a perfect square oscillator instance with hard edges.
  The process() method must be run once (and only once) at every sample.
@@ -135,6 +141,7 @@ private:
     float width = 0.5;
 };
 
+//==============================================================================
 /**
  Creates a smoother square oscillator instance with soft edges.
  The process() method must be run once (and only once) at every sample.
@@ -156,6 +163,7 @@ private:
     float width = 0.5;
 };
 
+//==============================================================================
 /**
  Creates a sawtooth oscillator instance.
  The process() method must be run once (and only once) at every sample.
@@ -168,89 +176,3 @@ class SawToothOsc : public Phasor
         return (_phase * 2.0f) - 1.0f;
     }
 };
-
-
-
-
-
-
-
-/// Creates an oscillator instance
-class Oscillator
-{
-private:
-    float sampleRate = 44100.0f;
-    float phase = 0.0f;
-    float phaseDelta;
-    float frequency;
-    const float pi = 3.14159265359;
-    
-public:
-    
-    ///sets the sample rate of the oscillator
-    void setSampleRate (float _sampleRate)
-    {
-        sampleRate = _sampleRate;
-    }
-    
-    ///sets the frequency of the oscillator
-    void setFrequency (float _frequency)
-    {
-        frequency = _frequency;
-        phaseDelta = frequency / sampleRate;
-    }
-    float processSine()
-    {
-        ///Process the next sample of the sinewave oscillator:
-        // Keep phase in range 0-1
-        if (phase > 1.0f)
-            phase -= 1.0f;
-        
-        // Calculate output sample
-        float output = 0.5f * sin (2 * pi * phase);
-        
-        // Update Phase
-        phase += phaseDelta;
-        return output;
-    }
-    float processSquare()
-    {
-        ///Process the next sample of the Squarewave oscillator:
-        // Keep the phase in range 0-1
-        if (phase > 1.0f)
-            phase -= 1.0f;
-        
-        // Calculate output sample
-        float output = 0.5f * tanhf (30.0f * sin (2.0f * pi * phase));
-        
-        // Update phase
-        phase += phaseDelta;
-        return output;
-    }
-    float processTriangle()
-    {
-        ///Process the next samples of the Trianglewave Oscillator
-        // Keep the phase in range 0-1
-        if(phase > 1.0f)
-            phase -= 1.0f;
-        
-        float output = 2.0f * (fabs (phase - 0.5f) - 0.25f);
-        
-        // Update phase
-        phase += phaseDelta;
-        return output;
-    }
-    float processSawtooth()
-    {
-        ///Process the next samples of the Sawtooth wave Oscillator
-        // Keep the phase in range 0-1
-        if(phase > 1.0f)
-            phase -= 1.0f;
-        
-        float output = phase - 0.5f;
-        return output;
-    }
-    
-};
-
-#endif /* Oscillator_h */

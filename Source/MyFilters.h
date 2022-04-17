@@ -3,7 +3,7 @@
 
     MyFilters.h
     Created: 12 Mar 2022 10:40:55am
-    Author:  Andreas Papaeracleous
+    Author:  B162025
 
   ==============================================================================
 */
@@ -115,7 +115,7 @@ public:
         c0 = wet;
     }
     
-    
+    //==========================================================================
 private:
     float cutoffFrequency;              // cutoff frequency
     float Qres;                         // Resonance parameter range (1-20)
@@ -132,7 +132,10 @@ private:
     float d0 = 0.0;
     
     //past samples
-    float x1, x2, y1, y2;
+    float x1 = 0.0f;
+    float x2 = 0.0f;
+    float y1 = 0.0f;
+    float y2 = 0.0f;
 };
 
 

@@ -10,6 +10,11 @@
 
 #pragma once
 
+/**
+ Class for an audio buffer designed to be used in conjunction with the Grain class.
+ 
+ A grainBuffer instance houses a 2 channel buffer, whose size is flexible,
+ */
 class GrainBuffer
 {
 public:
@@ -106,7 +111,7 @@ public:
         return maxReadPos;
     }
     
-    
+    //==========================================================================
 private:
     
     int sampleRate;
