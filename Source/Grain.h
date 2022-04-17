@@ -22,17 +22,6 @@ class Grain
 {
 public:
     
-    /**
-     Constructor, sets the sample rate
-     
-     @param _sampleRate Sample rate
-     */
-    Grain(int _sampleRate)
-    {
-        sampleRate = _sampleRate;
-        triOscillator.setSampleRate(sampleRate);
-    }
-    
     float getReadPos()
     {
         return readPos;
@@ -69,7 +58,11 @@ public:
         triOscillator.setPhase(phase);
     }
     
-    
+    void setSampleRate(int _sampleRate)
+    {
+        triOscillator.setSampleRate(_sampleRate);
+        sampleRate = _sampleRate;
+    }
     
     
 private:
