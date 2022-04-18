@@ -32,16 +32,18 @@ TabboulehAudioProcessor::~TabboulehAudioProcessor()
 //==============================================================================
 void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerBlock)
 {
-    // Save sampleRate as a parameter for future use.
-    sampleRate = _sampleRate;
-    
     // Initialise the Grain Buffer instance:
     grainBuffer.initialise(maxDelaySizeInSeconds, _sampleRate);
+    grainBuffer.setBufferSize(bufferSize);
+
+    grainManager.managePhases(activeGrains);
     
     // Initialise the grain intances:
     for (int i=0; i<maxGrainCount; i++)
     {
-        grains.push_back(Grain(sampleRate));
+        grains.push_back(Grain(_sampleRate));
+        grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
+        grains[i].setGrainPeriod(grainLength);
     }
 }
 
@@ -60,19 +62,57 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    grainBuffer.setBufferSize(delaySizeInSeconds);
-    auto* leftChannelData = buffer.getReadPointer(0);
-    auto* rightChannelData = buffer.getReadPointer(1);
+    auto* inputLeftChannelData = buffer.getReadPointer(0);
+    auto* inputRightChannelData = buffer.getReadPointer(1);
+    
+    auto* outputLeftChannelData = buffer.getWritePointer(0);
+    auto* outputRightChannelData = buffer.getWritePointer(1);
+    
+    if (activeGrains != activeGrains)//Remember to replace the first with the slider variable
+    {
+        //activeGrains = activeGrains;  //set the activeGrains in memory
+        grainManager.managePhases(activeGrains);
+        for (int i=0; i<maxGrainCount; i++)
+        {
+            grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
+        }
+    }
     
     //DSP Loop
     for (int DSPiterator = 0; DSPiterator < buffer.getNumSamples(); DSPiterator++)
     {
-        //Ensure the inputs are floats and not weird pointer things DONE
-        grainBuffer.writeVal(leftChannelData[DSPiterator], rightChannelData[DSPiterator]);
+        float inputSampleLeft = inputLeftChannelData[DSPiterator];
+        float inputSampleRight = inputRightChannelData[DSPiterator];
         
+        grainBuffer.writeVal(inputSampleLeft, inputSampleRight);
+        grainBuffer.setBufferSize(bufferSize);
+        
+        float outSampleLeft = 0.0f;
+        float outSampleRight = 0.0f;
+        
+        for (int i=0; i<maxGrainCount; i++)
+        {
+            grains[i].process(grainBuffer.getMaxReadPos(), grainRandomisation, shape);
+            outSampleLeft  += (1.0f/float(maxGrainCount))
+                            * grainManager.getVolumeForGrain(i)
+                            * grainBuffer.readValL(grains[i].getReadPos())
+                            * grains[i].getSampleEnvelope();
+            
+            outSampleRight += (1.0f/float(maxGrainCount))
+                            * grainManager.getVolumeForGrain(i)
+                            * grainBuffer.readValR(grains[i].getReadPos())
+                            * grains[i].getSampleEnvelope();
+        }
+        
+        outputLeftChannelData[DSPiterator]  = outSampleLeft;
+        outputRightChannelData[DSPiterator] = outSampleRight;
+        
+        testInt++;
+        if (testInt > 60)
+        {
+            testInt = 0;
+        }
     }
-        
-    
 }
 
 void TabboulehAudioProcessor::releaseResources()

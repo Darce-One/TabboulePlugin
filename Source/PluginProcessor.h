@@ -64,11 +64,20 @@ private:
     
     GrainBuffer grainBuffer;
     float maxDelaySizeInSeconds = 5.0f;
-    float delaySizeInSeconds = 1.0f;
+    float bufferSize = 1.0f;
     int sampleRate;
     
     GrainManager grainManager;
     
     std::vector<Grain> grains;
     int maxGrainCount = 5;
+    
+    float activeGrains = 2.8;
+    float grainLength = 0.05;
+    
+    float grainRandomisation = 0.5;
+    float shape = 0.5;
+    
+    float testInt = 0;
+    
 };

@@ -92,7 +92,7 @@ public:
      */
     float readValL(int index)
     {
-        return bufferL[readPos];
+        return bufferL[index];
     }
     
     /**
@@ -103,9 +103,10 @@ public:
      */
     float readValR(int index)
     {
-        return bufferR[readPos];
+        return bufferR[index];
     }
     
+    /// Returns the maximum read position, indicating to grains when to return to the start of the buffer.
     float getMaxReadPos()
     {
         return maxReadPos;
@@ -123,7 +124,6 @@ private:
     float* bufferL = nullptr;
     float* bufferR = nullptr;
     int writePos = 0;
-    int readPos = 0;
 };
 
 

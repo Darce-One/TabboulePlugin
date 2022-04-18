@@ -31,7 +31,7 @@ public:
     ///Constructor, sets the sampleRate
     Grain(int _sampleRate)
     {
-        setSampleRate(sampleRate);
+        setSampleRate(_sampleRate);
     }
     
     /**
@@ -132,7 +132,7 @@ public:
         for (int i=0; i<5; i++)
         {
             phases[i] = i * (1.0f / floor(_activeGrains));
-            volumes[i] = std::min(1.0f, std::max(_activeGrains - i, 0.0f));
+            volumes[i] = std::min(1.0f, std::max(_activeGrains - i - 1, 0.0f));
         }
     }
     
