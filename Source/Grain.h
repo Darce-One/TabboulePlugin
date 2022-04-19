@@ -46,8 +46,9 @@ public:
      
      @param _shape                                      Scalar float in range [0, 1], denoting how steep the fade ins and outs the grains obey.
      */
-    void process(int _grainMaxReadPos, float _grainRandomisation, float _shape)
+    void process(float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip)
     {
+        setGrainPeriod(_grainPeriod);
         sampleEnvelope = std::min((100.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
         readPos++;
         timeToReset = triRamp.newCycleStarted();
@@ -56,6 +57,15 @@ public:
         {
             maxReadPos = _grainMaxReadPos;
             readPos = readPos + floor((random.nextFloat()-0.5f) * maxReadPos * _grainRandomisation);
+            
+            if (random.nextFloat() < _chanceToSkip)
+            {
+                skippedGrainVolume = 0.0f;
+            }
+            else
+            {
+                skippedGrainVolume = 1.0f;
+            }
         }
         
         if (readPos >= maxReadPos || readPos < 0)
@@ -73,7 +83,7 @@ public:
     float getSampleEnvelope()
     {
         /// Returns the envelope coefficient at this sample for the grain.
-        return sampleEnvelope;
+        return sampleEnvelope * skippedGrainVolume;
     }
     
     /**
@@ -110,6 +120,7 @@ private:
     bool timeToReset = false;
     int maxReadPos = 4410;      //initialisation to be overriden before playback in process method.
     float sampleEnvelope;
+    float skippedGrainVolume = 1.0f;
 };
 
 /**=============================================================================

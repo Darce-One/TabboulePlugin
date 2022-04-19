@@ -69,7 +69,9 @@ private:
     float maxDelaySizeInSeconds = 5.0f;
     std::atomic<float>* bufferSizeParam;
     float bufferSize = 1.0f;
-    int sampleRate;
+    
+    std::atomic<float>* chanceToSkipGrainParam;
+    float chanceToSkipGrain = 0.2;
     
     GrainManager grainManager;
     

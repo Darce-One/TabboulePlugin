@@ -23,11 +23,12 @@ TabboulehAudioProcessor::TabboulehAudioProcessor()
                        ),
 #endif
 parameters(*this, nullptr, "ParameterTree", {
+    std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.010f, 0.5f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
-    std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
+    std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
 
 
 })
@@ -37,6 +38,7 @@ parameters(*this, nullptr, "ParameterTree", {
     grainShapeParam = parameters.getRawParameterValue("grain_Shape");
     grainLengthParam = parameters.getRawParameterValue("grain_Length");
     activeGrainsParam = parameters.getRawParameterValue("active_Grains");
+    chanceToSkipGrainParam = parameters.getRawParameterValue("chanceToSkip_Grain");
 }
 
 TabboulehAudioProcessor::~TabboulehAudioProcessor()
@@ -107,7 +109,7 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         for (int i=0; i<maxGrainCount; i++)
         {
-            grains[i].process(grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam);
+            grains[i].process(*grainLengthParam, grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam, *chanceToSkipGrainParam);
             outSampleLeft  += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValL(grains[i].getReadPos())
