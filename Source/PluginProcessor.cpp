@@ -26,7 +26,7 @@ parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.3f),
-    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.010f, 0.5f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.020f, 0.5f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
 
