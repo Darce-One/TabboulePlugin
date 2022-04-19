@@ -71,7 +71,10 @@ private:
     float bufferSize = 1.0f;
     
     std::atomic<float>* chanceToSkipGrainParam;
-    float chanceToSkipGrain = 0.2;
+    float chanceToSkipGrain = 0.2f;
+    
+    std::atomic<float>* grainStereoRandomnessParam;
+    float grainStereoRandomness = 0.2f;
     
     GrainManager grainManager;
     

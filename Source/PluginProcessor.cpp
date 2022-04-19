@@ -29,6 +29,7 @@ parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.020f, 0.5f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
+    std::make_unique<juce::AudioParameterFloat>("grain_StereoRandomness" ,"Spices", 0.0f, 1.0f, 0.2f),
 
 
 })
@@ -39,6 +40,7 @@ parameters(*this, nullptr, "ParameterTree", {
     grainLengthParam = parameters.getRawParameterValue("grain_Length");
     activeGrainsParam = parameters.getRawParameterValue("active_Grains");
     chanceToSkipGrainParam = parameters.getRawParameterValue("chanceToSkip_Grain");
+    grainStereoRandomnessParam = parameters.getRawParameterValue("grain_StereoRandomness");
 }
 
 TabboulehAudioProcessor::~TabboulehAudioProcessor()
@@ -109,16 +111,16 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         for (int i=0; i<maxGrainCount; i++)
         {
-            grains[i].process(*grainLengthParam, grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam, *chanceToSkipGrainParam);
+            grains[i].process(*grainLengthParam, grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam, *chanceToSkipGrainParam, *grainStereoRandomnessParam);
             outSampleLeft  += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValL(grains[i].getReadPos())
-                            * grains[i].getSampleEnvelope();
+                            * grains[i].getStereoVolumeLeft();
             
             outSampleRight += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValR(grains[i].getReadPos())
-                            * grains[i].getSampleEnvelope();
+                            * grains[i].getStereoVolumeRight();
         }
         
         outputLeftChannelData[DSPiterator]  = outSampleLeft;

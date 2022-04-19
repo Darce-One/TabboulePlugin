@@ -46,7 +46,7 @@ public:
      
      @param _shape                                      Scalar float in range [0, 1], denoting how steep the fade ins and outs the grains obey.
      */
-    void process(float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip)
+    void process(float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip, float _stereoRandomness)
     {
         setGrainPeriod(_grainPeriod);
         sampleEnvelope = std::min((100.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
@@ -66,6 +66,10 @@ public:
             {
                 skippedGrainVolume = 1.0f;
             }
+            
+            stereoVolumeLeft = 0.5f + ((random.nextFloat() - 0.5f) * _stereoRandomness);
+            stereoVolumeRight = 1.0f - stereoVolumeLeft;
+            
         }
         
         if (readPos >= maxReadPos || readPos < 0)
@@ -84,6 +88,18 @@ public:
     {
         /// Returns the envelope coefficient at this sample for the grain.
         return sampleEnvelope * skippedGrainVolume;
+    }
+    
+    /// Returns the volume of the left sample
+    float getStereoVolumeLeft()
+    {
+        return sampleEnvelope * skippedGrainVolume * stereoVolumeLeft;
+    }
+    
+    /// Returns the volume of the right sample;
+    float getStereoVolumeRight()
+    {
+        return sampleEnvelope * skippedGrainVolume * stereoVolumeRight;
     }
     
     /**
@@ -119,8 +135,10 @@ private:
     int readPos = 0;
     bool timeToReset = false;
     int maxReadPos = 4410;      //initialisation to be overriden before playback in process method.
-    float sampleEnvelope;
+    float sampleEnvelope = 0.0f;
     float skippedGrainVolume = 1.0f;
+    float stereoVolumeLeft = 1.0f;
+    float stereoVolumeRight = 1.0f;
 };
 
 /**=============================================================================
