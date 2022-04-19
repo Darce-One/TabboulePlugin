@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="PC7FMb" name="Tabbouleh" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildAAX,buildAU,buildStandalone,buildVST3">
+              pluginFormats="buildAU,buildStandalone,buildVST3">
   <MAINGROUP id="CUEUMd" name="Tabbouleh">
     <GROUP id="{63E180D1-94C7-2442-0990-CBEE26DC391A}" name="Source">
       <FILE id="XJvGN5" name="PluginProcessor.cpp" compile="1" resource="0"

@@ -8,16 +8,19 @@ are written into, and from which the grains will be able to playback.
 The Plugin will also analyse the incoming signal and chop it in pieces to be
 frequency analysed and then play back a triangular wave at the base frequency.
 
-The user controllable parameters will be:
+The user controllable parameters so far are:
 * Bowl size: Delay line size
 * Parsley chop: grain size
 * Parsley type: envelope pattern
 * Mama's Hands: grain randomiser gain
+* Onion: Number and phase of grains.
+* Bourghol: Chance of omitted grains.
+
+The user controllable parameters yet to add are:
 * Oil: Reverb
 * Lemon: High pass filter on grains
 * Tomato size: Volume of synths
 * Tomato Amount: frequency of FFT and note change
 * Tomato cut: Synth envelope
-* Bulgur: Chance of omitted samples
-* Spices: number of individual grains 1-4?
-* Onion: Number and phase of grains.
+* Spices: Panning randomness.
+* Fresh mint:
