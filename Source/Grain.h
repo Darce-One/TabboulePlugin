@@ -48,18 +48,19 @@ public:
      */
     void process(int _grainMaxReadPos, float _grainRandomisation, float _shape)
     {
-        sampleEnvelope = std::min((100.0f * _shape + 1.0f) * (1.0f + 0.5f * triOscillator.process()), 1.0f);
+        sampleEnvelope = std::min((100.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
         readPos++;
-        timeToReset = triOscillator.newCycleStarted();
-        
-        if (readPos >= maxReadPos)
-            readPos = 0;
+        timeToReset = triRamp.newCycleStarted();
         
         if (timeToReset == true)
         {
             maxReadPos = _grainMaxReadPos;
             readPos = readPos + floor((random.nextFloat()-0.5f) * maxReadPos * _grainRandomisation);
         }
+        
+        if (readPos >= maxReadPos || readPos < 0)
+            readPos = 0;
+        
     }
     
     float getReadPos()
@@ -84,19 +85,19 @@ public:
      */
     void setGrainPeriod(float grainPeriod)
     {
-        triOscillator.setFrequency(1.0f/grainPeriod);
+        triRamp.setFrequency(1.0f/grainPeriod);
     }
     
     void setGrainPhase(float phase)
     {
         /// Sets the phase of the grain. Method to be used lightly, as clicks may occur from envelopes and unexpectedly long grains.
-        triOscillator.setPhase(phase);
+        triRamp.setPhase(phase);
     }
     
     void setSampleRate(int _sampleRate)
     {
         /// Sets the sample rate of the project.
-        triOscillator.setSampleRate(_sampleRate);
+        triRamp.setSampleRate(_sampleRate);
         sampleRate = _sampleRate;
     }
     
@@ -104,7 +105,7 @@ public:
 private:
     int sampleRate;
     juce::Random random;
-    TriOsc triOscillator;
+    TriRamp triRamp;
     int readPos = 0;
     bool timeToReset = false;
     int maxReadPos = 4410;      //initialisation to be overriden before playback in process method.
@@ -127,12 +128,12 @@ public:
      
      @param _activeGrains float in range:  [1,  5.99], whose floored value is the number of grains.
      */
-    void managePhases(float _activeGrains)  // active grains range from 1 to 5.99
+    void managePhases(float _activeGrains)  // active grains range from 1 to 4.99
     {
         for (int i=0; i<5; i++)
         {
             phases[i] = i * (1.0f / floor(_activeGrains));
-            volumes[i] = std::min(1.0f, std::max(_activeGrains - i - 1, 0.0f));
+            volumes[i] = std::min(1.0f, std::max(_activeGrains - i, 0.0f));
         }
     }
     

@@ -62,8 +62,12 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabboulehAudioProcessor)
     
+    // Audio processor value tree state definition for user interface and preset saving
+    juce::AudioProcessorValueTreeState parameters;
+        
     GrainBuffer grainBuffer;
     float maxDelaySizeInSeconds = 5.0f;
+    std::atomic<float>* bufferSizeParam;
     float bufferSize = 1.0f;
     int sampleRate;
     
@@ -72,11 +76,15 @@ private:
     std::vector<Grain> grains;
     int maxGrainCount = 5;
     
+    std::atomic<float>* activeGrainsParam;
     float activeGrains = 2.8;
+    std::atomic<float>* grainLengthParam;
     float grainLength = 0.05;
     
+    std::atomic<float>* grainRandomisationParam;
     float grainRandomisation = 0.5;
-    float shape = 0.5;
+    std::atomic<float>* grainShapeParam;
+    float grainShape = 0.5;
     
     float testInt = 0;
     

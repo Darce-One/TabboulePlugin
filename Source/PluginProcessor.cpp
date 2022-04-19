@@ -20,9 +20,23 @@ TabboulehAudioProcessor::TabboulehAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+parameters(*this, nullptr, "ParameterTree", {
+    std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.3f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.010f, 0.5f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
+    std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
+
+
+})
 {
+    bufferSizeParam = parameters.getRawParameterValue("buffer_Size");
+    grainRandomisationParam = parameters.getRawParameterValue("grain_Randomisation");
+    grainShapeParam = parameters.getRawParameterValue("grain_Shape");
+    grainLengthParam = parameters.getRawParameterValue("grain_Length");
+    activeGrainsParam = parameters.getRawParameterValue("active_Grains");
 }
 
 TabboulehAudioProcessor::~TabboulehAudioProcessor()
@@ -33,17 +47,17 @@ TabboulehAudioProcessor::~TabboulehAudioProcessor()
 void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerBlock)
 {
     // Initialise the Grain Buffer instance:
-    grainBuffer.initialise(maxDelaySizeInSeconds, _sampleRate);
-    grainBuffer.setBufferSize(bufferSize);
+    grainBuffer.initialise (maxDelaySizeInSeconds, _sampleRate);
+    grainBuffer.setBufferSize (*bufferSizeParam);
 
-    grainManager.managePhases(activeGrains);
+    grainManager.managePhases(*activeGrainsParam);
     
     // Initialise the grain intances:
     for (int i=0; i<maxGrainCount; i++)
     {
         grains.push_back(Grain(_sampleRate));
         grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
-        grains[i].setGrainPeriod(grainLength);
+        grains[i].setGrainPeriod(*grainLengthParam);
     }
 }
 
@@ -68,9 +82,9 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     auto* outputLeftChannelData = buffer.getWritePointer(0);
     auto* outputRightChannelData = buffer.getWritePointer(1);
     
-    if (activeGrains != activeGrains)//Remember to replace the first with the slider variable
+    if (*activeGrainsParam != activeGrains)
     {
-        //activeGrains = activeGrains;  //set the activeGrains in memory
+        activeGrains = *activeGrainsParam;
         grainManager.managePhases(activeGrains);
         for (int i=0; i<maxGrainCount; i++)
         {
@@ -84,21 +98,22 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         float inputSampleLeft = inputLeftChannelData[DSPiterator];
         float inputSampleRight = inputRightChannelData[DSPiterator];
         
+        
         grainBuffer.writeVal(inputSampleLeft, inputSampleRight);
-        grainBuffer.setBufferSize(bufferSize);
+        grainBuffer.setBufferSize(*bufferSizeParam);
         
         float outSampleLeft = 0.0f;
         float outSampleRight = 0.0f;
         
         for (int i=0; i<maxGrainCount; i++)
         {
-            grains[i].process(grainBuffer.getMaxReadPos(), grainRandomisation, shape);
-            outSampleLeft  += (1.0f/float(maxGrainCount))
+            grains[i].process(grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam);
+            outSampleLeft  += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValL(grains[i].getReadPos())
                             * grains[i].getSampleEnvelope();
             
-            outSampleRight += (1.0f/float(maxGrainCount))
+            outSampleRight += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValR(grains[i].getReadPos())
                             * grains[i].getSampleEnvelope();
@@ -107,11 +122,14 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         outputLeftChannelData[DSPiterator]  = outSampleLeft;
         outputRightChannelData[DSPiterator] = outSampleRight;
         
+        //=============
+        // HERE ONLY FOR TESTING, zone for breakpoint if necessary! DELETE WHEN DONE!
         testInt++;
         if (testInt > 60)
         {
             testInt = 0;
         }
+        //=============
     }
 }
 
@@ -219,7 +237,7 @@ bool TabboulehAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* TabboulehAudioProcessor::createEditor()
 {
-    return new TabboulehAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -228,12 +246,25 @@ void TabboulehAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    // getStateInformation
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void TabboulehAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    // setStateInformation
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState.get() != nullptr)
+    {
+        if (xmlState->hasTagName (parameters.state.getType()))
+        {
+            parameters.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
+    }
 }
 
 //==============================================================================

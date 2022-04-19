@@ -13,11 +13,11 @@ The user controllable parameters will be:
 * Parsley chop: grain size
 * Parsley type: envelope pattern
 * Mama's Hands: grain randomiser gain
-* Oil: Either Morph or Reverb
+* Oil: Reverb
 * Lemon: High pass filter on grains
 * Tomato size: Volume of synths
 * Tomato Amount: frequency of FFT and note change
 * Tomato cut: Synth envelope
 * Bulgur: Chance of omitted samples
 * Spices: number of individual grains 1-4?
-* Onion:
+* Onion: Number and phase of grains.

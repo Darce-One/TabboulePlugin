@@ -89,6 +89,28 @@ private:
 
 //==============================================================================
 /**
+ Creates a triangle ramp instance: goes from 0, to 1 and back to 0.
+ The process() method must be run once (and only once) at every sample.
+ */
+class TriRamp : public Phasor
+{
+    float output (float _phase) override
+    {
+        if (_phase <= 0.5f)
+        {
+            return 2.0f * _phase;
+        }
+        
+        else
+        {
+            return 2.0f * (1.0f - _phase);
+        }
+    }
+};
+
+
+//==============================================================================
+/**
  Creates a triangle oscillator instance.
  The process() method must be run once (and only once) at every sample.
  */
