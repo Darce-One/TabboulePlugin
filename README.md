@@ -15,6 +15,7 @@ The user controllable parameters so far are:
 * Mama's Hands: grain randomiser gain
 * Onion: Number and phase of grains.
 * Bourghol: Chance of omitted grains.
+* Spices: Panning randomness.
 
 The user controllable parameters yet to add are:
 * Oil: Reverb
@@ -22,5 +23,4 @@ The user controllable parameters yet to add are:
 * Tomato size: Volume of synths
 * Tomato Amount: frequency of FFT and note change
 * Tomato cut: Synth envelope
-* Spices: Panning randomness.
-* Fresh mint:
+* Fresh mint: Synth Quantize to 12 tone!

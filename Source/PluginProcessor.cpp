@@ -111,7 +111,13 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         for (int i=0; i<maxGrainCount; i++)
         {
-            grains[i].process(*grainLengthParam, grainBuffer.getMaxReadPos(), *grainRandomisationParam, *grainShapeParam, *chanceToSkipGrainParam, *grainStereoRandomnessParam);
+            grains[i].process(*grainLengthParam,
+                              grainBuffer.getMaxReadPos(),
+                              *grainRandomisationParam,
+                              *grainShapeParam,
+                              *chanceToSkipGrainParam,
+                              *grainStereoRandomnessParam);
+            
             outSampleLeft  += (1.0f/float(*activeGrainsParam))
                             * grainManager.getVolumeForGrain(i)
                             * grainBuffer.readValL(grains[i].getReadPos())
