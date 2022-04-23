@@ -63,6 +63,12 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
         grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
         grains[i].setGrainPeriod(*grainLengthParam);
     }
+    //
+    //    //Initialise the FFTSynth instances:
+    //    for (int i=0; i<maxFftSynthCount; i++)
+    //    {
+    //        fftsynths.push_back(FFTSynth());
+    //    }
 }
 
 void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -118,15 +124,20 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
                               *chanceToSkipGrainParam,
                               *grainStereoRandomnessParam);
             
-            outSampleLeft  += (1.0f/float(*activeGrainsParam))
-                            * grainManager.getVolumeForGrain(i)
-                            * grainBuffer.readValL(grains[i].getReadPos())
-                            * grains[i].getStereoVolumeLeft();
-            
-            outSampleRight += (1.0f/float(*activeGrainsParam))
-                            * grainManager.getVolumeForGrain(i)
-                            * grainBuffer.readValR(grains[i].getReadPos())
-                            * grains[i].getStereoVolumeRight();
+            float grainSampleLeft = (1.0f/float(*activeGrainsParam))
+                                    * grainManager.getVolumeForGrain(i)
+                                    * grainBuffer.readValL(grains[i].getReadPos())
+                                    * grains[i].getStereoVolumeLeft();
+
+            float grainSampleRight = (1.0f/float(*activeGrainsParam))
+                                    * grainManager.getVolumeForGrain(i)
+                                    * grainBuffer.readValR(grains[i].getReadPos())
+                                    * grains[i].getStereoVolumeRight();
+
+            // fftsynths[i].writeInSamples(grainSampleLeft, grainSampleRight, grains[i].newGrainStarted());
+
+            outSampleLeft  += grainSampleLeft;
+            outSampleRight += grainSampleRight;
         }
         
         outputLeftChannelData[DSPiterator]  = outSampleLeft;
