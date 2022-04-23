@@ -127,6 +127,11 @@ public:
         sampleRate = _sampleRate;
     }
     
+    bool newGrainStarted()
+    {
+        return triRamp.newCycleStarted();
+    }
+    
     //==========================================================================
 private:
     int sampleRate;

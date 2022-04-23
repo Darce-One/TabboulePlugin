@@ -18,6 +18,7 @@
       <FILE id="YGjfgI" name="Grain.h" compile="0" resource="0" file="Source/Grain.h"/>
       <FILE id="UZRt22" name="MyFilters.h" compile="0" resource="0" file="Source/MyFilters.h"/>
       <FILE id="PP8Xl5" name="Oscillator.h" compile="0" resource="0" file="Source/Oscillator.h"/>
+      <FILE id="CPws5I" name="FFTSynth.h" compile="0" resource="0" file="Source/FFTSynth.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>

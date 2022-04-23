@@ -13,6 +13,7 @@
 #include "CustomFunctions.h"
 #include "Grain.h"
 #include "MyFilters.h"
+#include "FFTSynth.h"
 #include <vector>
 
 //==============================================================================
@@ -81,6 +82,9 @@ private:
     std::vector<Grain> grains;
     int maxGrainCount = 5;
     
+    std::vector<FFTSynth> fftsynths;
+    int maxFftSynthCount = maxGrainCount;
+    
     std::atomic<float>* activeGrainsParam;
     float activeGrains = 2.8;
     std::atomic<float>* grainLengthParam;
@@ -92,5 +96,6 @@ private:
     float grainShape = 0.5;
     
     float testInt = 0;
+    
     
 };
