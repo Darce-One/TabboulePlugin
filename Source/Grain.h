@@ -34,6 +34,14 @@ public:
         setSampleRate(_sampleRate);
     }
     
+    ///Constructor, sets the sampleRate, grainPhase and grainPeriod.
+    Grain(int _sampleRate, float initialPhase, float grainPeriod)
+    {
+        setSampleRate(_sampleRate);
+        setGrainPhase(initialPhase);
+        setGrainPeriod(grainPeriod);
+    }
+    
     /**
      Processes the grain instance, incrementing the readPos as necessary.
      

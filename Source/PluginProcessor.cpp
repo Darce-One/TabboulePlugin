@@ -59,9 +59,9 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
     // Initialise the grain intances:
     for (int i=0; i<maxGrainCount; i++)
     {
-        grains.push_back(Grain(_sampleRate));
-        grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
-        grains[i].setGrainPeriod(*grainLengthParam);
+        grains.push_back(Grain(_sampleRate, grainManager.getPhaseForGrain(i), *grainLengthParam));
+//        grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
+//        grains[i].setGrainPeriod(*grainLengthParam);
     }
     //
     //    //Initialise the FFTSynth instances:
