@@ -26,10 +26,11 @@ class FFTSynth
 public:
     
     /// Constructor
-    FFTSynth() : forwardFFT (fftOrder)
+    FFTSynth(int _sampleRate) : forwardFFT (fftOrder)
     {
         std::fill (fftData.begin(), fftData.end(), 0.0f);
         std::fill (fifo.begin(), fifo.end(), 0.0f);
+        sampleRate = _sampleRate;
     }
     
     /// Method that takes in the grain data, sample by sample. Must be called before other methods.
@@ -53,6 +54,10 @@ public:
     void processFFT()
     {
         forwardFFT.performFrequencyOnlyForwardTransform (fftData.data());
+        
+        // Get Main Frequency
+        
+        //set it to the synth
     }
     
     
@@ -67,5 +72,8 @@ private:
     std::array<float, fftSize * 2> fftData;             // transform data
     int fifoIndex = 0;                                  // temporary index keeps track of filled in samples
     bool nextFFTBlockReady = false;                     // trigger for fft operation
-    
+    int sampleRate;                                     // Sample rate of project
+    SineOsc sinOsc;
+    TriOsc triOsc;
+    SoftSquareOsc sqOsc;
 };

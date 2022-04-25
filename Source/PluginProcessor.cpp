@@ -26,7 +26,7 @@ parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.3f),
-    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsely Chop", 0.020f, 0.5f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Chop Size", 0.020f, 0.5f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
     std::make_unique<juce::AudioParameterFloat>("grain_StereoRandomness" ,"Spices", 0.0f, 1.0f, 0.2f),
@@ -57,11 +57,14 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
     grainManager.managePhases(*activeGrainsParam);
     
     // Initialise the grain intances:
-    for (int i=0; i<maxGrainCount; i++)
+    for (int i=0; i<maxGrainCount; i++)         //Test program is in Wk3_challenges
     {
-        grains.push_back(Grain(_sampleRate, grainManager.getPhaseForGrain(i), *grainLengthParam));
-//        grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
-//        grains[i].setGrainPeriod(*grainLengthParam);
+        if (grains.size() < maxGrainCount)
+        {
+            grains.push_back(Grain(_sampleRate, grainManager.getPhaseForGrain(i), *grainLengthParam));
+//              grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
+//              grains[i].setGrainPeriod(*grainLengthParam);
+        }
     }
     //
     //    //Initialise the FFTSynth instances:

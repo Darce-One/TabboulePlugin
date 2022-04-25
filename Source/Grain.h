@@ -57,7 +57,7 @@ public:
     void process(float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip, float _stereoRandomness)
     {
         setGrainPeriod(_grainPeriod);
-        sampleEnvelope = std::min((100.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
+        sampleEnvelope = std::min((20.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
         readPos++;
         timeToReset = triRamp.newCycleStarted();
         
@@ -96,6 +96,13 @@ public:
     {
         /// Returns the envelope coefficient at this sample for the grain.
         return sampleEnvelope * skippedGrainVolume;
+    }
+    
+    /// Returns the envelope coefficient at this sample for the grain, allowing for FFT functionality.
+    float getSineSquaredEnvelope()
+    {
+        float sinEnvelope = sin(triRamp.getPhase() * 3.14159265359);
+        return sinEnvelope * sinEnvelope;
     }
     
     /// Returns the volume of the left sample

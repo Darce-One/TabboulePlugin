@@ -44,6 +44,12 @@ public:
         phase = p;
     }
     
+    /// Returns the phase of the oscillator. Useful for getting more options out of one Oscillator instance.
+    float getPhase()
+    {
+        return phase;
+    }
+    
     float process()
     {
         ///Process the next sample of the sinewave oscillator:
