@@ -146,27 +146,34 @@ public:
      */
     float processSynth()
     {
-        sampleCount += 1;
-        
-        if (sampleCount < grainLengthInSamples)
+        if (synthIsPlaying)
         {
-            float synthSample = triOsc.process();
+            sampleCount += 1;
             
-            if (sampleCount < envelopeShapeInSamples)
+            if (sampleCount < grainLengthInSamples)
             {
-                return synthSample * synthVolume * 2.0f * sampleCount / float (grainLengthInSamples);
+                float synthSample = triOsc.process();
+                
+                if (sampleCount < envelopeShapeInSamples)
+                {
+                    return synthSample * synthVolume * 2.0f * sampleCount / float (grainLengthInSamples);
+                }
+                
+                else
+                {
+                    return synthSample * synthVolume * (sampleCount * descentSlope + descentIntercept);
+                }
             }
-            
             else
             {
-                return synthSample * synthVolume * (sampleCount * descentSlope + descentIntercept);
+                synthIsPlaying = false;
+                return 0.0f;
             }
         }
         else
         {
-            synthIsPlaying = false;
             return 0.0f;
-        } 
+        }
     }
     
     
@@ -195,7 +202,7 @@ private:
     float envelopeShapeTemp;
     int grainLengthInSamplesTemp;
     int sampleCount = 0;
-    bool synthIsPlaying = false;                        // Variable not used, only for debugging.
+    bool synthIsPlaying = false;                        
     float descentSlope;
     float descentIntercept;
     float synthVolume = 1.0f;
