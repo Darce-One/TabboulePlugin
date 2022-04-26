@@ -95,6 +95,9 @@ private:
     std::atomic<float>* grainShapeParam;
     float grainShape = 0.5;
     
+    float synthVolume = 0.8;
+    float synthEnvelopeShape = 0.5;
+    
     float testInt = 0;
     
     

@@ -57,21 +57,18 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
     grainManager.managePhases(*activeGrainsParam);
     
     // Initialise the grain intances:
-    for (int i=0; i<maxGrainCount; i++)         //Test program is in Wk3_challenges
+    for (int i=0; i<maxGrainCount; i++)
     {
         if (grains.size() < maxGrainCount)
-        {
             grains.push_back(Grain(_sampleRate, grainManager.getPhaseForGrain(i), *grainLengthParam));
-//              grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
-//              grains[i].setGrainPeriod(*grainLengthParam);
-        }
     }
-    //
-    //    //Initialise the FFTSynth instances:
-    //    for (int i=0; i<maxFftSynthCount; i++)
-    //    {
-    //        fftsynths.push_back(FFTSynth());
-    //    }
+    
+        //Initialise the FFTSynth instances:
+        for (int i=0; i<maxFftSynthCount; i++)
+        {
+            if (fftsynths.size() < maxFftSynthCount)
+                fftsynths.push_back(FFTSynth(_sampleRate, 0.5f, *grainLengthParam));
+        }
 }
 
 void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -127,20 +124,27 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
                               *chanceToSkipGrainParam,
                               *grainStereoRandomnessParam);
             
-            float grainSampleLeft = (1.0f/float(*activeGrainsParam))
+            float unprocessedGrainSampleL = grainBuffer.readValL(grains[i].getReadPos());
+            float unprocessedGrainSampleR = grainBuffer.readValR(grains[i].getReadPos());
+            
+            fftsynths[i].writeInSamples(unprocessedGrainSampleL, unprocessedGrainSampleR, grains[i].newGrainStarted());
+            
+            fftsynths[i].setEnvelopeParams(synthEnvelopeShape, *grainLengthParam);
+            float synthOut = fftsynths[i].processSynth() * synthVolume;
+            
+            float outGrainSampleL = ((2.0f/float(*activeGrainsParam))
                                     * grainManager.getVolumeForGrain(i)
-                                    * grainBuffer.readValL(grains[i].getReadPos())
-                                    * grains[i].getStereoVolumeLeft();
+                                    * unprocessedGrainSampleL
+                                    * grains[i].getStereoVolumeLeft()) + synthOut;
 
-            float grainSampleRight = (1.0f/float(*activeGrainsParam))
+            float outGrainSampleR = ((2.0f/float(*activeGrainsParam))
                                     * grainManager.getVolumeForGrain(i)
-                                    * grainBuffer.readValR(grains[i].getReadPos())
-                                    * grains[i].getStereoVolumeRight();
+                                    * unprocessedGrainSampleR
+                                    * grains[i].getStereoVolumeRight()) + synthOut;
 
-            // fftsynths[i].writeInSamples(grainSampleLeft, grainSampleRight, grains[i].newGrainStarted());
-
-            outSampleLeft  += grainSampleLeft;
-            outSampleRight += grainSampleRight;
+            
+            outSampleLeft  += outGrainSampleL;
+            outSampleRight += outGrainSampleR;
         }
         
         outputLeftChannelData[DSPiterator]  = outSampleLeft;
@@ -149,7 +153,7 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         //=============
         // HERE ONLY FOR TESTING, zone for breakpoint if necessary! DELETE WHEN DONE!
         testInt++;
-        if (testInt > 60)
+        if (testInt > 6000)
         {
             testInt = 0;
         }

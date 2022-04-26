@@ -89,7 +89,7 @@ private:
     float sampleRate = 44100.0f;
     float phase = 0.0f;
     float phaseDelta;
-    float frequency;
+    float frequency = 1.0f;
     bool newCycle = true;
 };
 
