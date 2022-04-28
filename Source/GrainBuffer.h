@@ -29,6 +29,8 @@ public:
     {
         sampleRate = _sampleRate;
         maxSize = _maxDelayTime * _sampleRate;
+        maxReadPos = maxSize;
+        
         bufferL = new float[maxSize];
         bufferR = new float[maxSize];
         

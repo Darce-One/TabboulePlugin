@@ -25,11 +25,15 @@ TabboulehAudioProcessor::TabboulehAudioProcessor()
 parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
-    std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.3f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.6f),
     std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Chop Size", 0.020f, 0.5f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
     std::make_unique<juce::AudioParameterFloat>("grain_StereoRandomness" ,"Spices", 0.0f, 1.0f, 0.2f),
+    std::make_unique<juce::AudioParameterFloat>("synth_Volume" ,"Tomato Size", 0.0f, 1.0f, 0.2f),
+    std::make_unique<juce::AudioParameterFloat>("synth_Envelope" ,"Tomato Cut", 0.01f, 0.99f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("highPass_Frequency" ,"Lemon", 20.0f, 2500.0f, 100.0f),
+    std::make_unique<juce::AudioParameterFloat>("reverb_Amount" ,"Oil", 0.0f, 0.99f, 0.4f),
 
 
 })
@@ -41,6 +45,10 @@ parameters(*this, nullptr, "ParameterTree", {
     activeGrainsParam = parameters.getRawParameterValue("active_Grains");
     chanceToSkipGrainParam = parameters.getRawParameterValue("chanceToSkip_Grain");
     grainStereoRandomnessParam = parameters.getRawParameterValue("grain_StereoRandomness");
+    synthVolumeParam = parameters.getRawParameterValue("synth_Volume");
+    synthEnvelopeShapeParam = parameters.getRawParameterValue("synth_Envelope");
+    hpFrequencyParam = parameters.getRawParameterValue("highPass_Frequency");
+    reverbAmountParam = parameters.getRawParameterValue("reverb_Amount");
 }
 
 TabboulehAudioProcessor::~TabboulehAudioProcessor()
@@ -50,6 +58,9 @@ TabboulehAudioProcessor::~TabboulehAudioProcessor()
 //==============================================================================
 void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerBlock)
 {
+    // Save sampleRate for later use:
+    sampleRate = _sampleRate;
+    
     // Initialise the Grain Buffer instance:
     grainBuffer.initialise (maxDelaySizeInSeconds, _sampleRate);
     grainBuffer.setBufferSize (*bufferSizeParam);
@@ -69,6 +80,15 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
             if (fftsynths.size() < maxFftSynthCount)
                 fftsynths.push_back(FFTSynth(_sampleRate, 0.5f, *grainLengthParam));
         }
+    
+    // Initialise the filters and reverb:
+    hpFilterL.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, *hpFrequencyParam));
+    hpFilterR.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, *hpFrequencyParam));
+    
+    setReverbParams(reverbParams, *reverbAmountParam, *grainStereoRandomnessParam);
+    reverb.setSampleRate(sampleRate);
+    reverb.setParameters(reverbParams);
+    
 }
 
 void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -102,11 +122,15 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         }
     }
     
+    // Recalibrate the High Pass Filters to user setting:
+    hpFilterL.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, *hpFrequencyParam));
+    hpFilterR.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, *hpFrequencyParam));
+    
     //DSP Loop
     for (int DSPiterator = 0; DSPiterator < buffer.getNumSamples(); DSPiterator++)
     {
-        float inputSampleLeft = inputLeftChannelData[DSPiterator];
-        float inputSampleRight = inputRightChannelData[DSPiterator];
+        float inputSampleLeft = hpFilterL.processSingleSampleRaw(inputLeftChannelData[DSPiterator]);
+        float inputSampleRight = hpFilterR.processSingleSampleRaw(inputRightChannelData[DSPiterator]);
         
         
         grainBuffer.writeVal(inputSampleLeft, inputSampleRight);
@@ -124,24 +148,22 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
                               *chanceToSkipGrainParam,
                               *grainStereoRandomnessParam);
             
-            float unprocessedGrainSampleL = grainBuffer.readValL(grains[i].getReadPos());
-            float unprocessedGrainSampleR = grainBuffer.readValR(grains[i].getReadPos());
+            float unprocessedGrainSampleL = grainBuffer.readValL(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
+            float unprocessedGrainSampleR = grainBuffer.readValR(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
             
             fftsynths[i].writeInSamples(unprocessedGrainSampleL, unprocessedGrainSampleR, grains[i].newGrainStarted());
             
-            fftsynths[i].setEnvelopeParams(synthEnvelopeShape, *grainLengthParam);
-            float synthOut = fftsynths[i].processSynth() * synthVolume;
+            fftsynths[i].setEnvelopeParams(*synthEnvelopeShapeParam, *grainLengthParam);
+            float synthOut = fftsynths[i].processSynth() * *synthVolumeParam;
             
             float outGrainSampleL = ((2.0f/float(*activeGrainsParam))
-                                    * grainManager.getVolumeForGrain(i)
                                     * unprocessedGrainSampleL
                                     * grains[i].getStereoVolumeLeft()) + synthOut;
 
             float outGrainSampleR = ((2.0f/float(*activeGrainsParam))
-                                    * grainManager.getVolumeForGrain(i)
                                     * unprocessedGrainSampleR
                                     * grains[i].getStereoVolumeRight()) + synthOut;
-
+            
             
             outSampleLeft  += outGrainSampleL;
             outSampleRight += outGrainSampleR;
@@ -149,6 +171,10 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         outputLeftChannelData[DSPiterator]  = outSampleLeft;
         outputRightChannelData[DSPiterator] = outSampleRight;
+        
+        // Update Reverb Parameters:
+        setReverbParams(reverbParams, *reverbAmountParam, *grainStereoRandomnessParam);
+        reverb.setParameters(reverbParams);
         
         //=============
         // HERE ONLY FOR TESTING, zone for breakpoint if necessary! DELETE WHEN DONE!
@@ -159,6 +185,9 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         }
         //=============
     }
+    
+    // Apply reverb to buffer
+    reverb.processStereo(outputLeftChannelData, outputRightChannelData, buffer.getNumSamples());
 }
 
 void TabboulehAudioProcessor::releaseResources()

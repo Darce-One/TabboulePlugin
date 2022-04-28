@@ -66,6 +66,8 @@ private:
     // Audio processor value tree state definition for user interface and preset saving
     juce::AudioProcessorValueTreeState parameters;
         
+    int sampleRate;
+    
     GrainBuffer grainBuffer;
     float maxDelaySizeInSeconds = 5.0f;
     std::atomic<float>* bufferSizeParam;
@@ -95,9 +97,20 @@ private:
     std::atomic<float>* grainShapeParam;
     float grainShape = 0.5;
     
+    std::atomic<float>* synthVolumeParam;
     float synthVolume = 0.8;
+    std::atomic<float>* synthEnvelopeShapeParam;
     float synthEnvelopeShape = 0.5;
     
+    juce::IIRFilter hpFilterL;
+    juce::IIRFilter hpFilterR;
+    std::atomic<float>* hpFrequencyParam;
+    float hpFrequency = 1000.0f;
+    
+    juce::Reverb reverb;
+    juce::Reverb::Parameters reverbParams;
+    std::atomic<float>* reverbAmountParam;
+    float reverbAmount;
     float testInt = 0;
     
     

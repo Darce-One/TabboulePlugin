@@ -175,7 +175,7 @@ public:
     /**
      Method to be called once at a time, calculates the volume and spacing of the grains
      
-     @param _activeGrains float in range:  [1,  5.99], whose floored value is the number of grains.
+     @param _activeGrains float in range:  [1,  4.99], whose floored value is the number of grains.
      */
     void managePhases(float _activeGrains)  // active grains range from 1 to 4.99
     {

@@ -9,3 +9,17 @@
 */
 
 #pragma
+
+void setReverbParams(juce::Reverb::Parameters& reverbParams, float oilLevel, float spiceLevel)
+{
+    //Calculate Params
+    float wetLevel = 0.8f * oilLevel;
+    float dryLevel = 1.0f - wetLevel;
+    float roomSize = 0.5f + (0.3f * (oilLevel * oilLevel));
+    
+    //Implement Params
+    reverbParams.width = spiceLevel;
+    reverbParams.dryLevel = dryLevel;
+    reverbParams.wetLevel = wetLevel;
+    reverbParams.roomSize = roomSize;
+}

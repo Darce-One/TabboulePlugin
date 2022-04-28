@@ -32,7 +32,8 @@ public:
      
      It starts by clearing the input - output float buffers used in the fourier transform, sets the sample rate,
      sets the frequency of 25Hz to the Hann Oscillator (for a half period of 0.02 seconds),
-     sets the value of the float to be multiplied by the returned index of the highest
+     sets the value of the float to be multiplied by the returned index of the highest,
+     sets the filter coefficients to remove lows and highs from incoming audio.
      
      @param _sampleRate Sample rate of project.
      @param _envelopeShape Float between [0-1], 0 denoting short attack and long release, and 1 denoting long attack short release.
@@ -53,6 +54,9 @@ public:
         
         setEnvelopeParams(_envelopeShape, _grainLengthInSeconds);
         setRealEnvelopeParams();
+        
+        lpFilter.setCoefficients(juce::IIRCoefficients::makeLowPass(sampleRate, 5000.0f));
+        hpFilter.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, 60.0f));
     }
     
     /**
@@ -102,14 +106,19 @@ public:
             }
             // Reset the last max abs sample
             grainMaxAbsSample = 0.0f;
+            
+            // Reset the filters
+            lpFilter.reset();
+            hpFilter.reset();
         }
         
         // While listenning (1 hann window length): store windowed incoming audio in fifo, keep track of max sample. stop listenning at the end of the hann window.
         if (listenning == true)
         {
-            // Window audio
+            // Window and filter audio
             float hannToBeSquared = sinOscForHann.process();
-            float monoSample = (leftSample + rightSample) * 0.5f * hannToBeSquared * hannToBeSquared;
+            float monoSampleRaw = (leftSample + rightSample) * 0.5f * hannToBeSquared * hannToBeSquared;
+            float monoSample = lpFilter.processSingleSampleRaw(hpFilter.processSingleSampleRaw(monoSampleRaw));
             
             // Store in fifo
             fifo[(size_t) fifoIndex++] = monoSample;
@@ -206,8 +215,10 @@ private:
     float descentSlope;
     float descentIntercept;
     float synthVolume = 1.0f;
+    juce::IIRFilter lpFilter;
+    juce::IIRFilter hpFilter;
     
-    
+
     
     /**
      sets the temporary values of envelope shape and grain size in stone when called by the private method processFFT()
