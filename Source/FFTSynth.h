@@ -9,6 +9,7 @@
 */
 
 #pragma once
+#include "CustomFunctions.h"
 
 /**
  This class creates an instance of a synth which listens to an input and follows it.
@@ -39,7 +40,7 @@ public:
      @param _envelopeShape Float between [0-1], 0 denoting short attack and long release, and 1 denoting long attack short release.
      @param _grainLenthInSeconds length of incoming grains in seconds, to make the outgoing grains the same length
      */
-    FFTSynth(int _sampleRate, float _envelopeShape, float _grainLengthInSeconds) : forwardFFT (fftOrder)
+    FFTSynth(int _sampleRate, float _envelopeShape, float _grainLengthInSeconds, float _precision, float _freqA) : forwardFFT (fftOrder)
     {
         std::fill (fftData.begin(), fftData.end(), 0.0f);
         std::fill (fifo.begin(), fifo.end(), 0.0f);
@@ -57,6 +58,8 @@ public:
         
         lpFilter.setCoefficients(juce::IIRCoefficients::makeLowPass(sampleRate, 5000.0f));
         hpFilter.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, 60.0f));
+        
+        setPrecision(_precision, _freqA);
     }
     
     /**
@@ -204,6 +207,13 @@ public:
         return stereoVolumeRight;
     }
     
+    void setPrecision(float _precision, float _freqA = 440.0f)
+    {
+        precision = _precision;
+        freqA = _freqA;
+    }
+    
+    
     static constexpr auto fftOrder = 16;                // Order 16 --> 2 ^ 16 = 65532 samples covers grains of 500 ms at 92 kHz
     static constexpr auto fftSize = 1 << fftOrder;
     
@@ -238,6 +248,8 @@ private:
     juce::Random random;
     float stereoVolumeLeft = 0.5f;
     float stereoVolumeRight = 0.5f;
+    float freqA = 440.0f;
+    float precision = 0.2f;
     
     /**
      sets the temporary values of envelope shape and grain size in stone when called by the private method processFFT()
@@ -282,8 +294,9 @@ private:
         
         synthFrequency = index * indexMultiplierForFrequencyAquisition;
         
+        
         //set it to the synth
-        triOsc.setFrequency(synthFrequency);
+        triOsc.setFrequency (adjustedFrequency (synthFrequency, precision, freqA));
 
         // trigger the synth
         sampleCount = 0;

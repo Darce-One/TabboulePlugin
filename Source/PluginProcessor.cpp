@@ -33,8 +33,10 @@ parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("synth_Volume" ,"Tomato Size", 0.0f, 1.0f, 0.2f),
     std::make_unique<juce::AudioParameterFloat>("synth_Envelope" ,"Tomato Cut", 0.01f, 0.99f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("synth_Volume_Threshold" ,"Tomato Age", 0.01f, 0.90f, 0.2f),
+    std::make_unique<juce::AudioParameterFloat>("frequency_Precision" ,"Mint", 0.0f, 1.0f, 0.6f),
     std::make_unique<juce::AudioParameterFloat>("highPass_Frequency" ,"Lemon", 20.0f, 2500.0f, 100.0f),
     std::make_unique<juce::AudioParameterFloat>("reverb_Amount" ,"Oil", 0.0f, 0.99f, 0.4f),
+    std::make_unique<juce::AudioParameterFloat>("freqA" ,"Tuning: A = (Hz)", 400.0f, 500.0f, 440.0f),
 
 
 })
@@ -49,8 +51,10 @@ parameters(*this, nullptr, "ParameterTree", {
     synthVolumeParam = parameters.getRawParameterValue("synth_Volume");
     synthEnvelopeShapeParam = parameters.getRawParameterValue("synth_Envelope");
     synthVolumeThresholdParam = parameters.getRawParameterValue("synth_Volume_Threshold");
+    frequencyPrecisionParam = parameters.getRawParameterValue("frequency_Precision");
     hpFrequencyParam = parameters.getRawParameterValue("highPass_Frequency");
     reverbAmountParam = parameters.getRawParameterValue("reverb_Amount");
+    freqAParam = parameters.getRawParameterValue("freqA");
 }
 
 TabboulehAudioProcessor::~TabboulehAudioProcessor()
@@ -80,7 +84,7 @@ void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerB
         for (int i=0; i<maxFftSynthCount; i++)
         {
             if (fftsynths.size() < maxFftSynthCount)
-                fftsynths.push_back(FFTSynth(_sampleRate, 0.5f, *grainLengthParam));
+                fftsynths.push_back(FFTSynth(_sampleRate, 0.5f, *grainLengthParam, *frequencyPrecisionParam, *freqAParam));
         }
     
     // Initialise the filters and reverb:
@@ -123,6 +127,12 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
         }
     }
+    
+    for (int i=0; i<maxGrainCount; i++)
+    {
+        fftsynths[i].setPrecision (*frequencyPrecisionParam, *freqAParam);
+    }
+    
     
     // Recalibrate the High Pass Filters to user setting:
     hpFilterL.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, *hpFrequencyParam));

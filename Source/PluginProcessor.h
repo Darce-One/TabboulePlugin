@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 #include "GrainBuffer.h"
-#include "CustomFunctions.h"
+//#include "CustomFunctions.h"
 #include "Grain.h"
 #include "MyFilters.h"
 #include "FFTSynth.h"
@@ -103,6 +103,12 @@ private:
     float synthEnvelopeShape = 0.5;
     std::atomic<float>* synthVolumeThresholdParam;
     float synthVolumeThreshold = 0.01;
+    
+    std::atomic<float>* frequencyPrecisionParam;
+    float frequencyPrecision = 0.2f;
+    std::atomic<float>* freqAParam;
+    float freqA = 440.0f;
+    
     
     juce::IIRFilter hpFilterL;
     juce::IIRFilter hpFilterR;

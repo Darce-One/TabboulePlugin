@@ -9,6 +9,7 @@
 */
 
 #pragma
+#include <math.h>
 
 void setReverbParams(juce::Reverb::Parameters& reverbParams, float oilLevel, float spiceLevel)
 {
@@ -22,4 +23,25 @@ void setReverbParams(juce::Reverb::Parameters& reverbParams, float oilLevel, flo
     reverbParams.dryLevel = dryLevel;
     reverbParams.wetLevel = wetLevel;
     reverbParams.roomSize = roomSize;
+}
+
+///Converts Midi note (0-127) to float frequency
+float midiToFrequency (int midiNote, float freqA = 440.0f)
+{
+    return freqA * pow (2.0, (midiNote - 69) / 12.0);
+}
+
+///Converts frequency into midi note
+float frequencyToMidi (float frequency, float freqA = 440.0f)
+{
+    return 12 * log2 (frequency / freqA) + 69;
+}
+
+float adjustedFrequency (float frequency, float precision, float freqA = 440.0f)
+{
+    float relativeMidiNote = frequencyToMidi (frequency, freqA);
+    float nearestMidiNote = round (relativeMidiNote);
+    float adjustedMidi = ((1 - precision) * relativeMidiNote) + (precision * nearestMidiNote);
+    
+    return midiToFrequency (adjustedMidi, freqA);
 }
