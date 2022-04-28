@@ -32,6 +32,7 @@ parameters(*this, nullptr, "ParameterTree", {
     std::make_unique<juce::AudioParameterFloat>("grain_StereoRandomness" ,"Spices", 0.0f, 1.0f, 0.2f),
     std::make_unique<juce::AudioParameterFloat>("synth_Volume" ,"Tomato Size", 0.0f, 1.0f, 0.2f),
     std::make_unique<juce::AudioParameterFloat>("synth_Envelope" ,"Tomato Cut", 0.01f, 0.99f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("synth_Volume_Threshold" ,"Tomato Age", 0.01f, 0.90f, 0.2f),
     std::make_unique<juce::AudioParameterFloat>("highPass_Frequency" ,"Lemon", 20.0f, 2500.0f, 100.0f),
     std::make_unique<juce::AudioParameterFloat>("reverb_Amount" ,"Oil", 0.0f, 0.99f, 0.4f),
 
@@ -47,6 +48,7 @@ parameters(*this, nullptr, "ParameterTree", {
     grainStereoRandomnessParam = parameters.getRawParameterValue("grain_StereoRandomness");
     synthVolumeParam = parameters.getRawParameterValue("synth_Volume");
     synthEnvelopeShapeParam = parameters.getRawParameterValue("synth_Envelope");
+    synthVolumeThresholdParam = parameters.getRawParameterValue("synth_Volume_Threshold");
     hpFrequencyParam = parameters.getRawParameterValue("highPass_Frequency");
     reverbAmountParam = parameters.getRawParameterValue("reverb_Amount");
 }
@@ -151,18 +153,25 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             float unprocessedGrainSampleL = grainBuffer.readValL(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
             float unprocessedGrainSampleR = grainBuffer.readValR(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
             
-            fftsynths[i].writeInSamples(unprocessedGrainSampleL, unprocessedGrainSampleR, grains[i].newGrainStarted());
+            fftsynths[i].writeInSamples(unprocessedGrainSampleL,
+                                        unprocessedGrainSampleR,
+                                        grains[i].newGrainStarted(),
+                                        *synthVolumeThresholdParam,
+                                        *chanceToSkipGrainParam,
+                                        *grainStereoRandomnessParam);
             
             fftsynths[i].setEnvelopeParams(*synthEnvelopeShapeParam, *grainLengthParam);
             float synthOut = fftsynths[i].processSynth() * *synthVolumeParam;
             
-            float outGrainSampleL = ((2.0f/float(*activeGrainsParam))
+            float outGrainSampleL = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleL
-                                    * grains[i].getStereoVolumeLeft()) + synthOut;
+                                    * grains[i].getStereoVolumeLeft()))
+                                    + (synthOut * fftsynths[i].getStereoVolumeLeft());
 
-            float outGrainSampleR = ((2.0f/float(*activeGrainsParam))
+            float outGrainSampleR = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleR
-                                    * grains[i].getStereoVolumeRight()) + synthOut;
+                                    * grains[i].getStereoVolumeRight()))
+                                    + (synthOut * fftsynths[i].getStereoVolumeRight());
             
             
             outSampleLeft  += outGrainSampleL;
@@ -178,11 +187,11 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         
         //=============
         // HERE ONLY FOR TESTING, zone for breakpoint if necessary! DELETE WHEN DONE!
-        testInt++;
-        if (testInt > 6000)
-        {
-            testInt = 0;
-        }
+//        testInt++;
+//        if (testInt > 6000)
+//        {
+//            testInt = 0;
+//        }
         //=============
     }
     

@@ -81,7 +81,7 @@ public:
      It stops listenning once the hann window has ended.
      
      */
-    void writeInSamples (float leftSample, float rightSample, bool newGrainStarted)
+    void writeInSamples (float leftSample, float rightSample, bool newGrainStarted, float newThreshold, float _chanceToSkip, float _stereoRandomness)
     {
         // When a new grain starts: refresh buffers, enable listenning, and depending on the whether the last grain was loud enough, analyse it.
         if (newGrainStarted == true)
@@ -99,10 +99,12 @@ public:
             sinOscForHann.setPhase(0.0f);
             
             // Check if last grain was loud enough
-            if (grainMaxAbsSample > grainMaxAbsSampleThreshold)
+            if (grainMaxAbsSample > grainMaxAbsSampleThreshold && random.nextFloat() > _chanceToSkip)
             {
                 synthVolume = grainMaxAbsSample;
                 processFFT();
+                stereoVolumeLeft = 0.5f + ((random.nextFloat() - 0.5f) * _stereoRandomness);
+                stereoVolumeRight = 1.0f - stereoVolumeLeft;
             }
             // Reset the last max abs sample
             grainMaxAbsSample = 0.0f;
@@ -133,6 +135,8 @@ public:
             if (sinOscForHann.getPhase() > 0.5)
                 listenning = false;
         }
+        
+        setGrainMaxAbsSampleThreshold (newThreshold);
     }
     
     
@@ -185,6 +189,20 @@ public:
         }
     }
     
+    void setGrainMaxAbsSampleThreshold(float newThreshold)
+    {
+        grainMaxAbsSampleThreshold = newThreshold;
+    }
+    
+    float getStereoVolumeLeft()
+    {
+        return stereoVolumeLeft;
+    }
+    
+    float getStereoVolumeRight()
+    {
+        return stereoVolumeRight;
+    }
     
     static constexpr auto fftOrder = 16;                // Order 16 --> 2 ^ 16 = 65532 samples covers grains of 500 ms at 92 kHz
     static constexpr auto fftSize = 1 << fftOrder;
@@ -217,8 +235,9 @@ private:
     float synthVolume = 1.0f;
     juce::IIRFilter lpFilter;
     juce::IIRFilter hpFilter;
-    
-
+    juce::Random random;
+    float stereoVolumeLeft = 0.5f;
+    float stereoVolumeRight = 0.5f;
     
     /**
      sets the temporary values of envelope shape and grain size in stone when called by the private method processFFT()

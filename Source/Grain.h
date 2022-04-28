@@ -181,7 +181,7 @@ public:
     {
         for (int i=0; i<5; i++)
         {
-            phases[i] = i * (1.0f / floor(_activeGrains));
+            phases[i] = i * (1.0f / floor(_activeGrains + 1));
             volumes[i] = std::min(1.0f, std::max(_activeGrains - i, 0.0f));
         }
     }

@@ -101,6 +101,8 @@ private:
     float synthVolume = 0.8;
     std::atomic<float>* synthEnvelopeShapeParam;
     float synthEnvelopeShape = 0.5;
+    std::atomic<float>* synthVolumeThresholdParam;
+    float synthVolumeThreshold = 0.01;
     
     juce::IIRFilter hpFilterL;
     juce::IIRFilter hpFilterR;
