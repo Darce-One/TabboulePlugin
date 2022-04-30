@@ -299,8 +299,9 @@ private:
         triOsc.setFrequency (adjustedFrequency (synthFrequency, precision, freqA));
 
         // trigger the synth
-        sampleCount = 0;
+        sampleCount = -1;               // Starts at -1 (not 0) because the += 1 happens at the start of the loop.
         setRealEnvelopeParams();
         synthIsPlaying = true;
+        triOsc.setPhase(0.25f);
     }
 };

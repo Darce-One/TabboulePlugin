@@ -118,10 +118,10 @@ public:
 private:
     
     int sampleRate;
-    int currentWriteSize;
-    int currentSizeTemporary;
+    int currentWriteSize = 0;
+    int currentSizeTemporary = 0;
     int oldWriteSize;
-    int maxReadPos;
+    int maxReadPos = 0;
     int maxSize;
     float* bufferL = nullptr;
     float* bufferR = nullptr;
