@@ -63,62 +63,53 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabboulehAudioProcessor)
     
+    
+    
     // Audio processor value tree state definition for user interface and preset saving
     juce::AudioProcessorValueTreeState parameters;
-        
+     
+    // GENERAL VARIABLES:
     int sampleRate;
-    
-    GrainBuffer grainBuffer;
-    float maxDelaySizeInSeconds = 5.0f;
-    std::atomic<float>* bufferSizeParam;
-    float bufferSize = 1.0f;
-    
-    std::atomic<float>* chanceToSkipGrainParam;
-    float chanceToSkipGrain = 0.2f;
-    
-    std::atomic<float>* grainStereoRandomnessParam;
-    float grainStereoRandomness = 0.2f;
-    
-    GrainManager grainManager;
-    
-    std::vector<Grain> grains;
     int maxGrainCount = 5;
-    
-    std::vector<FFTSynth> fftsynths;
     int maxFftSynthCount = maxGrainCount;
-    
-    std::atomic<float>* activeGrainsParam;
-    float activeGrains = 2.8;
-    std::atomic<float>* grainLengthParam;
-    float grainLength = 0.05;
-    
-    std::atomic<float>* grainRandomisationParam;
-    float grainRandomisation = 0.5;
-    std::atomic<float>* grainShapeParam;
-    float grainShape = 0.5;
-    
-    std::atomic<float>* synthVolumeParam;
-    float synthVolume = 0.8;
-    std::atomic<float>* synthEnvelopeShapeParam;
-    float synthEnvelopeShape = 0.5;
-    std::atomic<float>* synthVolumeThresholdParam;
-    float synthVolumeThreshold = 0.01;
-    
-    std::atomic<float>* frequencyPrecisionParam;
-    float frequencyPrecision = 0.2f;
-    std::atomic<float>* freqAParam;
-    float freqA = 440.0f;
-    
-    
+    // Filters
     juce::IIRFilter hpFilterL;
     juce::IIRFilter hpFilterR;
     std::atomic<float>* hpFrequencyParam;
-    float hpFrequency = 1000.0f;
-    
+    // Reverb
     juce::Reverb reverb;
     juce::Reverb::Parameters reverbParams;
     std::atomic<float>* reverbAmountParam;
-    float reverbAmount;
+    
+    
+    // BUFFER RELATED VARIABLES:
+    GrainBuffer grainBuffer;
+    float maxDelaySizeInSeconds = 5.0f;
+    std::atomic<float>* bufferSizeParam;
+
+    
+    // GRAIN RELATED VARIABLES:
+    GrainManager grainManager;
+    std::vector<Grain> grains;
+    std::atomic<float>* chanceToSkipGrainParam;
+    std::atomic<float>* grainStereoRandomnessParam;
+    std::atomic<float>* activeGrainsParam;
+    std::atomic<float>* grainLengthParam;
+    std::atomic<float>* grainRandomisationParam;
+    std::atomic<float>* grainShapeParam;
+    float activeGrains;
+    
+    
+    // SYNTHS RELATED VARIABLES:
+    std::vector<FFTSynth> fftsynths;
+    std::atomic<float>* synthVolumeParam;
+    std::atomic<float>* synthEnvelopeShapeParam;
+    std::atomic<float>* synthVolumeThresholdParam;
+    std::atomic<float>* frequencyPrecisionParam;
+    std::atomic<float>* freqAParam;
+
+
+    // TEST VARIABLE:
     float testInt = 0;
     
     

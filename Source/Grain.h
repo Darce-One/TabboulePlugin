@@ -29,17 +29,17 @@ class Grain
 public:
      
     ///Constructor, sets the sampleRate
-    Grain(int _sampleRate)
+    Grain (int _sampleRate)
     {
-        setSampleRate(_sampleRate);
+        setSampleRate (_sampleRate);
     }
     
     ///Constructor, sets the sampleRate, grainPhase and grainPeriod.
-    Grain(int _sampleRate, float initialPhase, float grainPeriod)
+    Grain (int _sampleRate, float initialPhase, float grainPeriod)
     {
-        setSampleRate(_sampleRate);
-        setGrainPhase(initialPhase);
-        setGrainPeriod(grainPeriod);
+        setSampleRate (_sampleRate);
+        setGrainPhase (initialPhase);
+        setGrainPeriod (grainPeriod);
     }
     
     /**
@@ -48,23 +48,30 @@ public:
      This method must be called at every sample, for each grain. Only then can the other methods
      be called to avoid errors.
      
-     @param _grainMaxReadPos                The last readable sample from the GrainBuffer instance.
+     @param _grainPeriod                            length of grain in seconds.
      
-     @param _grainRandomisation         Scalar float in range [0, 1], denoting how randomly the grains are selected.
+     @param _grainMaxReadPos                    The last readable sample from the GrainBuffer instance.
      
-     @param _shape                                      Scalar float in range [0, 1], denoting how steep the fade ins and outs the grains obey.
+     @param _grainRandomisation             Scalar float in range [0, 1], denoting how randomly the grains are selected.
+     
+     @param _shape                                          Scalar float in range [0, 1], denoting how steep the fade ins and outs the grains obey.
+     
+     @param _chanceToSkip                           Probability of a skipped grain.
+     
+     @param _stereoRandomness                  Scalar float in range [0-1] denoting the width of the stereo field.
      */
-    void process(float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip, float _stereoRandomness)
+    void process (float _grainPeriod, int _grainMaxReadPos, float _grainRandomisation, float _shape, float _chanceToSkip, float _stereoRandomness)
     {
-        setGrainPeriod(_grainPeriod);
-        sampleEnvelope = std::min((20.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
+        
         readPos++;
+        setGrainPeriod (_grainPeriod);
+        sampleEnvelope = std::min ((20.0f * _shape + 1.0f) * triRamp.process(), 1.0f);
         timeToReset = triRamp.newCycleStarted();
         
         if (timeToReset == true)
         {
             maxReadPos = _grainMaxReadPos;
-            readPos = readPos + floor((random.nextFloat()-0.5f) * maxReadPos * _grainRandomisation);
+            readPos = readPos + floor ((random.nextFloat()-0.5f) * maxReadPos * _grainRandomisation);
             
             if (random.nextFloat() < _chanceToSkip)
             {
@@ -85,23 +92,22 @@ public:
         
     }
     
+    /// Returns the sample of the buffer to read from.
     float getReadPos()
     {
-        /// Returns the sample of the buffer to read from.
         return readPos;
     }
     
-    
+    /// Returns the envelope coefficient at this sample for the grain.
     float getSampleEnvelope()
     {
-        /// Returns the envelope coefficient at this sample for the grain.
         return sampleEnvelope * skippedGrainVolume;
     }
     
     /// Returns the envelope coefficient at this sample for the grain, allowing for FFT functionality.
     float getSineSquaredEnvelope()
     {
-        float sinEnvelope = sin(triRamp.getPhase() * 3.14159265359);
+        float sinEnvelope = sin (triRamp.getPhase() * 3.14159265359);
         return sinEnvelope * sinEnvelope;
     }
     

@@ -15,7 +15,7 @@
  This class creates an instance of a synth which listens to an input and follows it.
  It is designed to be used in conjunction with the grainBuffer, Grain and Oscillator classes.
  
- A lot of the code found here is taken from the JUCE tutorial on the Fast Fourier Transform, which can be found here:
+ Some of the code found here is taken from the JUCE tutorial on the Fast Fourier Transform, which can be found here:
  https://docs.juce.com/master/tutorial_simple_fft.html
  
  Variable names and types are identical to those used in that tutorial, it is the member functions that change to adapt to this use.
@@ -38,7 +38,9 @@ public:
      
      @param _sampleRate Sample rate of project.
      @param _envelopeShape Float between [0-1], 0 denoting short attack and long release, and 1 denoting long attack short release.
-     @param _grainLenthInSeconds length of incoming grains in seconds, to make the outgoing grains the same length
+     @param _grainLengthInSeconds length of incoming grains in seconds, to make the outgoing grains the same length
+     @param _precision float between [0-1] determining the degree of tuning to 12 tone temperement
+     @param _freqA Frequency of A3 in tuning.
      */
     FFTSynth(int _sampleRate, float _envelopeShape, float _grainLengthInSeconds, float _precision, float _freqA) : forwardFFT (fftOrder)
     {
@@ -46,20 +48,20 @@ public:
         std::fill (fifo.begin(), fifo.end(), 0.0f);
         
         sampleRate = _sampleRate;
-        triOsc.setSampleRate(sampleRate);
-        sinOscForHann.setSampleRate(sampleRate);
+        triOsc.setSampleRate (sampleRate);
+        sinOscForHann.setSampleRate (sampleRate);
         
-        sinOscForHann.setFrequency(25.0f);
+        sinOscForHann.setFrequency (25.0f);
         
-        indexMultiplierForFrequencyAquisition = sampleRate / float(fftSize);
+        indexMultiplierForFrequencyAquisition = sampleRate / float (fftSize);
         
-        setEnvelopeParams(_envelopeShape, _grainLengthInSeconds);
+        setEnvelopeParams (_envelopeShape, _grainLengthInSeconds);
         setRealEnvelopeParams();
         
-        lpFilter.setCoefficients(juce::IIRCoefficients::makeLowPass(sampleRate, 5000.0f));
-        hpFilter.setCoefficients(juce::IIRCoefficients::makeHighPass(sampleRate, 60.0f));
+        lpFilter.setCoefficients (juce::IIRCoefficients::makeLowPass (sampleRate, 5000.0f));
+        hpFilter.setCoefficients (juce::IIRCoefficients::makeHighPass (sampleRate, 60.0f));
         
-        setPrecision(_precision, _freqA);
+        setPrecision (_precision, _freqA);
     }
     
     /**
@@ -70,6 +72,9 @@ public:
      @param leftSample the left sample of the grain
      @param rightSample the right sample of the grain
      @param newGrainStarted boolean to be taken from the grain class method .newGrainStarted.
+     @param newThreshold threshold a sample must surpass to trigger the FFT operations
+     @param _chanceToSkip Probability of skipping a grain
+     @param _stereoRandomness width of stereo field
      
      First, method checks if the information coming in corresponds to a new grain.
      If so, it refreshed the buffers with 0s while moving the old grain samples into the fft buffer for potential analysis.
@@ -99,7 +104,7 @@ public:
             listenning = true;
             
             // Resetting hann window phase
-            sinOscForHann.setPhase(0.0f);
+            sinOscForHann.setPhase (0.0f);
             
             // Check if last grain was loud enough
             if (grainMaxAbsSample > grainMaxAbsSampleThreshold && random.nextFloat() > _chanceToSkip)
@@ -129,7 +134,7 @@ public:
             fifo[(size_t) fifoIndex++] = monoSample;
             
             // Keep track of max sample
-            float AbsSample = std::abs(monoSample);
+            float AbsSample = std::abs (monoSample);
             
             if (AbsSample > grainMaxAbsSample)
                 grainMaxAbsSample = AbsSample;
@@ -150,7 +155,7 @@ public:
      @param _envelopeShape Float between [0-1], 0 denoting short attack and long release, and 1 denoting long attack short release.
      @param _grainLenthInSeconds length of incoming grains in seconds, to make the outgoing grains the same length
      */
-    void setEnvelopeParams(float _envelopeShape, float _grainLengthInSeconds)
+    void setEnvelopeParams (float _envelopeShape, float _grainLengthInSeconds)
     {
         envelopeShapeTemp = _envelopeShape;
         grainLengthInSamplesTemp = _grainLengthInSeconds * sampleRate;
@@ -192,7 +197,7 @@ public:
         }
     }
     
-    void setGrainMaxAbsSampleThreshold(float newThreshold)
+    void setGrainMaxAbsSampleThreshold (float newThreshold)
     {
         grainMaxAbsSampleThreshold = newThreshold;
     }
@@ -207,7 +212,7 @@ public:
         return stereoVolumeRight;
     }
     
-    void setPrecision(float _precision, float _freqA = 440.0f)
+    void setPrecision (float _precision, float _freqA = 440.0f)
     {
         precision = _precision;
         freqA = _freqA;
@@ -218,39 +223,40 @@ public:
     static constexpr auto fftSize = 1 << fftOrder;
     
 private:
+    
+    //FFT PARAMETERS
     juce::dsp::FFT forwardFFT;                          // fft instance
     std::array<float, fftSize> fifo;                    // input array
     std::array<float, fftSize * 2> fftData;             // transform data
     int fifoIndex = 0;                                  // temporary index keeps track of filled in samples
-//    bool nextFFTBlockReady = false;                     // trigger for fft operation
-    bool listenning = false;                            // status of hann window.
-    int sampleRate;                                     // Sample rate of project
-//    SineOsc sinOsc;
-    TriOsc triOsc;
-//    SoftSquareOsc sqOsc;
-    SineOsc sinOscForHann;
     float grainMaxAbsSample = 0.0f;
     float grainMaxAbsSampleThreshold = 0.01f;
+    bool listenning = false;                            // status of hann window.
+    int sampleRate;                                     // Sample rate of project
+    juce::IIRFilter lpFilter;                           // Low Pass Filter
+    juce::IIRFilter hpFilter;                           // High Pass Filter
+    SineOsc sinOscForHann;                              // Oscillator for Hann window
+
+    
+    // SYNTH PARAMETERS
+    TriOsc triOsc;                                      // Synth oscillator
     float synthFrequency = 1.0f;
+    int sampleCount = 0;
+    bool synthIsPlaying = false;                        
+    float synthVolume = 1.0f;
+    float stereoVolumeLeft = 0.5f;
+    float stereoVolumeRight = 0.5f;
+    float freqA = 440.0f;
+    float precision = 0.2f;
+    juce::Random random;
     float indexMultiplierForFrequencyAquisition;
     float envelopeShape;
     int envelopeShapeInSamples;
     int grainLengthInSamples;
     float envelopeShapeTemp;
     int grainLengthInSamplesTemp;
-    int sampleCount = 0;
-    bool synthIsPlaying = false;                        
     float descentSlope;
     float descentIntercept;
-    float synthVolume = 1.0f;
-    juce::IIRFilter lpFilter;
-    juce::IIRFilter hpFilter;
-    juce::Random random;
-    float stereoVolumeLeft = 0.5f;
-    float stereoVolumeRight = 0.5f;
-    float freqA = 440.0f;
-    float precision = 0.2f;
-    
     /**
      sets the temporary values of envelope shape and grain size in stone when called by the private method processFFT()
      
@@ -284,7 +290,7 @@ private:
         float maxAmplitude = 0.0f;
         for (int i=0; i<fftSize; i++)
         {
-            float binAbsAmplitude = std::abs(fftData[i]);
+            float binAbsAmplitude = std::abs (fftData[i]);
             if (binAbsAmplitude > maxAmplitude)
             {
                 index = i;
@@ -302,6 +308,6 @@ private:
         sampleCount = -1;               // Starts at -1 (not 0) because the += 1 happens at the start of the loop.
         setRealEnvelopeParams();
         synthIsPlaying = true;
-        triOsc.setPhase(0.25f);
+        triOsc.setPhase (0.25f);
     }
 };

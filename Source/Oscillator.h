@@ -25,22 +25,22 @@ public:
     
     virtual ~Phasor() {}
     
-    
+    ///sets the sample rate of the oscillator
     void setSampleRate (float _sampleRate)
     {
-        ///sets the sample rate of the oscillator
         sampleRate = _sampleRate;
     }
     
+    ///sets the frequency of the oscillator
     void setFrequency (float _frequency)
     {
-        ///sets the frequency of the oscillator
         frequency = _frequency;
         phaseDelta = frequency / sampleRate;
     }
+    
+    ///resets the phase of the phasor
     void setPhase (float p)
     {
-        ///resets the phase of the phasor
         phase = p;
     }
     
@@ -50,9 +50,9 @@ public:
         return phase;
     }
     
+    ///Process the next sample of the sinewave oscillator:
     float process()
     {
-        ///Process the next sample of the sinewave oscillator:
         // Update Phase
         phase += phaseDelta;
         
@@ -71,16 +71,17 @@ public:
         return output (phase);
     }
     
+    ///Determines what happens to the phase
+    ///In the phasor class, it doesn't alter it
     virtual float output (float _phase)
     {
-        ///Determines what happens to the phase
-        ///In the phasor class, it doesn't alter it
+        
         return _phase;
     }
     
+    ///returns true at every new phase cycle;
     bool newCycleStarted()
     {
-        ///returns true at every new phase cycle;
         return newCycle;
     }
     

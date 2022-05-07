@@ -8,7 +8,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include <vector>
 
 //==============================================================================
 TabboulehAudioProcessor::TabboulehAudioProcessor()
@@ -23,6 +22,8 @@ TabboulehAudioProcessor::TabboulehAudioProcessor()
                        ),
 #endif
 parameters(*this, nullptr, "ParameterTree", {
+    
+    // Parameters
     std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.6f),
@@ -41,6 +42,7 @@ parameters(*this, nullptr, "ParameterTree", {
 
 })
 {
+    // Parameters
     bufferSizeParam = parameters.getRawParameterValue("buffer_Size");
     grainRandomisationParam = parameters.getRawParameterValue("grain_Randomisation");
     grainShapeParam = parameters.getRawParameterValue("grain_Shape");
@@ -64,13 +66,14 @@ TabboulehAudioProcessor::~TabboulehAudioProcessor()
 //==============================================================================
 void TabboulehAudioProcessor::prepareToPlay (double _sampleRate, int samplesPerBlock)
 {
-    // Save sampleRate for later use:
+    // Store sampleRate for later use:
     sampleRate = _sampleRate;
     
     // Initialise the Grain Buffer instance:
     grainBuffer.initialise (maxDelaySizeInSeconds, _sampleRate);
     grainBuffer.setBufferSize (*bufferSizeParam);
 
+    // Initialise the grain manager:
     grainManager.managePhases(*activeGrainsParam);
     
     // Initialise the grain intances:
@@ -112,26 +115,29 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    // Get read pointers:
     auto* inputLeftChannelData = buffer.getReadPointer(0);
     auto* inputRightChannelData = buffer.getReadPointer(1);
     
+    // Get write pointers:
     auto* outputLeftChannelData = buffer.getWritePointer(0);
     auto* outputRightChannelData = buffer.getWritePointer(1);
     
+    // Check if activeGrainsParam (Onion) changed:
     if (*activeGrainsParam != activeGrains)
     {
+        // If true, recalculate the phases of the grains and set them to each grain:
         activeGrains = *activeGrainsParam;
         grainManager.managePhases(activeGrains);
+        
         for (int i=0; i<maxGrainCount; i++)
-        {
             grains[i].setGrainPhase(grainManager.getPhaseForGrain(i));
-        }
+
     }
     
+    // Set the tuning precision to the FFTSynths:
     for (int i=0; i<maxGrainCount; i++)
-    {
         fftsynths[i].setPrecision (*frequencyPrecisionParam, *freqAParam);
-    }
     
     
     // Recalibrate the High Pass Filters to user setting:
@@ -141,18 +147,22 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     //DSP Loop
     for (int DSPiterator = 0; DSPiterator < buffer.getNumSamples(); DSPiterator++)
     {
+        // Get the filtered incoming audio samples for both L and R channels:
         float inputSampleLeft = hpFilterL.processSingleSampleRaw(inputLeftChannelData[DSPiterator]);
         float inputSampleRight = hpFilterR.processSingleSampleRaw(inputRightChannelData[DSPiterator]);
         
-        
+        // Store the collected samples into the buffer, and check for size:
         grainBuffer.writeVal(inputSampleLeft, inputSampleRight);
         grainBuffer.setBufferSize(*bufferSizeParam);
         
+        // Initialise out samples:
         float outSampleLeft = 0.0f;
         float outSampleRight = 0.0f;
         
+        // Following operations done at a grain level:
         for (int i=0; i<maxGrainCount; i++)
         {
+            // Process the ith grain:
             grains[i].process(*grainLengthParam,
                               grainBuffer.getMaxReadPos(),
                               *grainRandomisationParam,
@@ -160,9 +170,11 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
                               *chanceToSkipGrainParam,
                               *grainStereoRandomnessParam);
             
+            // Get the right and left out samples from active grains (0 for inactive):
             float unprocessedGrainSampleL = grainBuffer.readValL(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
             float unprocessedGrainSampleR = grainBuffer.readValR(grains[i].getReadPos()) * grainManager.getVolumeForGrain(i);
             
+            // Write in L/R Samples into FFT buffers and process the instance.
             fftsynths[i].writeInSamples(unprocessedGrainSampleL,
                                         unprocessedGrainSampleR,
                                         grains[i].newGrainStarted(),
@@ -170,24 +182,30 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
                                         *chanceToSkipGrainParam,
                                         *grainStereoRandomnessParam);
             
+            // Set envelope parameters in synths:
             fftsynths[i].setEnvelopeParams(*synthEnvelopeShapeParam, *grainLengthParam);
+            
+            // Get the output of th synth:
             float synthOut = fftsynths[i].processSynth() * *synthVolumeParam;
             
+            // Calculate the Left sample:
             float outGrainSampleL = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleL
                                     * grains[i].getStereoVolumeLeft()))
                                     + (synthOut * fftsynths[i].getStereoVolumeLeft());
 
+            // Calculate the Right sample:
             float outGrainSampleR = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleR
                                     * grains[i].getStereoVolumeRight()))
                                     + (synthOut * fftsynths[i].getStereoVolumeRight());
             
-            
+            // Add the L/R samples to the main output:
             outSampleLeft  += outGrainSampleL;
             outSampleRight += outGrainSampleR;
         }
         
+        // Write samples to output:
         outputLeftChannelData[DSPiterator]  = outSampleLeft;
         outputRightChannelData[DSPiterator] = outSampleRight;
         

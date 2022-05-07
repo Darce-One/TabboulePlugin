@@ -25,15 +25,22 @@ public:
      @param _maxDelayTime maximum length of buffers in seconds
      @param _sampleRate sample rate
      */
-    void initialise(int _maxDelayTime, int _sampleRate)
+    void initialise (int _maxDelayTime, int _sampleRate)
     {
+        // If buffers exist, delete them:
+        if (bufferL) delete[] bufferL;
+        if (bufferR) delete[] bufferR;
+        
+        // set variables:
         sampleRate = _sampleRate;
         maxSize = _maxDelayTime * _sampleRate;
         maxReadPos = maxSize;
         
+        // Create buffers:
         bufferL = new float[maxSize];
         bufferR = new float[maxSize];
         
+        // populate buffers with 0:
         for (int i=0; i<maxSize; i++)
         {
             bufferL[i] = 0.0f;
@@ -44,7 +51,7 @@ public:
     ///Destructor
     ~GrainBuffer()
     {
-        // If bufferL exists, delete it!
+        // If buffers exist, delete them:
         if (bufferL) delete[] bufferL;
         if (bufferR) delete[] bufferR;
     }
@@ -55,7 +62,7 @@ public:
      
      @param _currentSize the new size of the buffers
      */
-    void setBufferSize(float _currentSize)
+    void setBufferSize (float _currentSize)
     {
         currentSizeTemporary = floor (_currentSize * sampleRate);
     }
@@ -67,13 +74,16 @@ public:
      @param inputSampleL the Left input sample
      @param inputSampleR the Right input sample
      */
-    void writeVal(float inputSampleL, float inputSampleR)
+    void writeVal (float inputSampleL, float inputSampleR)
     {
+        // increment writing position:
         writePos++;
         
+        //keep writing position in bounds:
         if (writePos >= currentWriteSize || writePos >= maxSize)
         {
             writePos = 0;
+            
             // Must insure that the current size used here only changes when the
             // write position is reset to ensure no gaps in playback
             maxReadPos = currentWriteSize;
@@ -81,6 +91,7 @@ public:
 
         }
         
+        // Write in samples:
         bufferL[writePos] = inputSampleL;
         bufferR[writePos] = inputSampleR;
         
@@ -92,7 +103,7 @@ public:
      @param index The reading position index [0-4]
      @return sample value at reading position
      */
-    float readValL(int index)
+    float readValL (int index)
     {
         return bufferL[index];
     }
@@ -103,7 +114,7 @@ public:
      @param index The reading position index [0-4]
      @return sample value at reading position
      */
-    float readValR(int index)
+    float readValR (int index)
     {
         return bufferR[index];
     }

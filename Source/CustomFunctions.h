@@ -11,6 +11,7 @@
 #pragma
 #include <math.h>
 
+/// Sets mapped reverb parameters according to Two custom parameters.
 void setReverbParams(juce::Reverb::Parameters& reverbParams, float oilLevel, float spiceLevel)
 {
     //Calculate Params
@@ -37,6 +38,7 @@ float frequencyToMidi (float frequency, float freqA = 440.0f)
     return 12 * log2 (frequency / freqA) + 69;
 }
 
+/// Returns the tuned frequency according to precision and tuning.
 float adjustedFrequency (float frequency, float precision, float freqA = 440.0f)
 {
     float relativeMidiNote = frequencyToMidi (frequency, freqA);
