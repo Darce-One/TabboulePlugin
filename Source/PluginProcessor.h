@@ -10,9 +10,8 @@
 
 #include <JuceHeader.h>
 #include "GrainBuffer.h"
-//#include "CustomFunctions.h"
+#include "CustomFunctions.h"
 #include "Grain.h"
-#include "MyFilters.h"
 #include "FFTSynth.h"
 #include <vector>
 
@@ -97,11 +96,13 @@ private:
     std::atomic<float>* grainLengthParam;
     std::atomic<float>* grainRandomisationParam;
     std::atomic<float>* grainShapeParam;
+    std::atomic<float>* grainVolumeParam;
     float activeGrains;
     
     
     // SYNTHS RELATED VARIABLES:
     std::vector<FFTSynth> fftsynths;
+    std::atomic<float>* synthOscillatorSelectParam;
     std::atomic<float>* synthVolumeParam;
     std::atomic<float>* synthEnvelopeShapeParam;
     std::atomic<float>* synthVolumeThresholdParam;

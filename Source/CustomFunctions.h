@@ -8,8 +8,10 @@
   ==============================================================================
 */
 
-#pragma
+#pragma once
+
 #include <math.h>
+#include "Oscillator.h"
 
 /// Sets mapped reverb parameters according to Two custom parameters.
 void setReverbParams(juce::Reverb::Parameters& reverbParams, float oilLevel, float spiceLevel)
@@ -47,3 +49,23 @@ float adjustedFrequency (float frequency, float precision, float freqA = 440.0f)
     
     return midiToFrequency (adjustedMidi, freqA);
 }
+
+
+/**
+ Processes three oscillators and returns the mixed output of all three according to the parameter.
+ @param OscillatorSelect float in range [1-3]
+ */
+float processOscillators(float oscillatorSelect, SineOsc& _sineOsc, TriOsc& _triOsc, AntiAliasSawToothOsc& _sawOsc)
+{
+    float sinSample = _sineOsc.process();
+    float triSample = _triOsc.process();
+    float sawSample = _sawOsc.process();
+    
+    float sinVolume = -0.2f * oscillatorSelect + 1.5f;
+    float triVolume = 1.0f - fabs (oscillatorSelect - 2.0f);
+    float sawVolume = 0.5 * (0.5f * oscillatorSelect - 0.5f);
+    
+    return 0.33f * ((sinSample * sinVolume) + (triSample * triVolume) + (sawSample * sawVolume));
+}
+
+

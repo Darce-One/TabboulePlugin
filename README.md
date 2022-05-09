@@ -10,29 +10,26 @@ frequency analysed and then play back a triangular wave at the base frequency.
 
 The user controllable parameters so far are:
 * Bowl size: Delay line size
-* Parsley chop: grain size
-* Parsley type: envelope pattern
 * Mama's Hands: grain randomiser gain
+* Parsley shape: envelope pattern
+* Parsley chop: grain size
+* Parsley Amount: Volume of Grains
 * Onion: Number and phase of grains.
 * Bourghol: Chance of omitted grains.
 * Spices: Panning randomness.
-* Oil: Reverb
-* Lemon: High pass filter on grains
-* Tomato size: Volume of synths
-* Tomato abundance: Tolerance level on FFTSynths
+* Tomato Amount: Volume of synths
+* Tomato Ripeness: Oscillator type
 * Tomato shape: Synth envelope
+* Tomato Age: Tolerance level on FFTSynths
+* Mint: Tuning Accuracy to 12 tone.
+* Lemon: High pass filter on grains
+* Oil: Reverb
 * Fresh mint: Synth Quantize to 12 tone!
+* FreqA: Tuning parameter for synths.
 
-There is a lot of room for progress, the two main and simplest
-to implement at this stage are:
-* A 'Tomato type' parameter, allowing for smooth transition between a sine,
-triangle and sawtooth oscillator.
-* A volume control for the parsley, and a wider range of volume for the Synths.
 
 ## Inspiration:
 
-I'm not entirely sure where the idea for this plugin came about. I first
-thought of it while brainstorming for the drone project.
 I remember hearing of the Milk Box Compressor guitar pedal, and I really liked
 the concept. The concept of granulation was fresh in my mind too at the time,
 having tried out and really liked the plugin 'Emergence' by Daniel Gergely.
@@ -49,4 +46,4 @@ parameters, such as FM synthesis to say the least.
 
 When running in the Plugin Host, changing the sampleRate results in a tuning
 error. That is because the prepare to play is not run at the start when
-changing the sample rate in that software. 
+changing the sample rate in that software.

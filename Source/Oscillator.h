@@ -10,7 +10,7 @@
 
 #pragma once
 #include <cmath>
-
+#include "CustomFunctions.h"
 
 /**
  Creates a Phasor instance.
@@ -83,6 +83,11 @@ public:
     bool newCycleStarted()
     {
         return newCycle;
+    }
+    
+    float getPhaseDelta()
+    {
+        return phaseDelta;
     }
     
     //==========================================================================
@@ -177,7 +182,6 @@ private:
  */
 class SoftSquareOsc : public Phasor
 {
-    ///Creates a square oscillator instance
     public : void setPulseWidth (float _width)
     {
         width = _width;
@@ -199,9 +203,49 @@ private:
  */
 class SawToothOsc : public Phasor
 {
-    ///Creates a sawtooth oscillator instance
     float output (float _phase) override
     {
         return (_phase * 2.0f) - 1.0f;
     }
 };
+
+//==============================================================================
+/**
+ Creates an anti aliased sawtooth oscillator instance, following the paper by Vesa Valimaki and Antti Huovilainen
+ https:ieeexplore.ieee.org/abstract/document/4117934?casa_token=tbLyqzTQiQMAAAAA:beJiY1lmePb8wotluILgs224rkZMzD65fEWs3robfxUCFua8ib8VbO3KCVIPImqufl4QCL-6cA
+ The process() method must be run once (and only once) at every sample.
+ 
+ Uses the Polyblep function from the CustomFunction.h file
+ */
+class AntiAliasSawToothOsc : public Phasor
+{
+    float output (float _phase) override
+    {
+        return (_phase * 2.0f) - 1.0f - polyblep(_phase, getPhaseDelta());
+    }
+    
+    /// Determines by how much a sample must be changed when dealing with the AntiAliasedSawTooth oscillator found in the Osciilator.h file.
+    float polyblep(float _phase, float _phaseDelta)
+    {
+        if (_phase > 1.0f - _phaseDelta)
+        {
+            float t = (_phase - 1.0) / _phaseDelta;
+            return t*t + t+t + 1.0;
+        }
+        
+        else if (_phase < _phaseDelta)
+        {
+            float t = _phase / _phaseDelta;
+            return -t*t + t+t - 1.0;
+        }
+        
+        else
+        {
+            return 0.0f;
+        }
+    }
+
+};
+
+
+

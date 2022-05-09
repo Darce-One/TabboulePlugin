@@ -10,6 +10,7 @@
 
 #pragma once
 #include "CustomFunctions.h"
+#include "Oscillator.h"
 
 /**
  This class creates an instance of a synth which listens to an input and follows it.
@@ -49,6 +50,8 @@ public:
         
         sampleRate = _sampleRate;
         triOsc.setSampleRate (sampleRate);
+        sinOsc.setSampleRate (sampleRate);
+        sawOsc.setSampleRate (sampleRate);
         sinOscForHann.setSampleRate (sampleRate);
         
         sinOscForHann.setFrequency (25.0f);
@@ -100,13 +103,13 @@ public:
             std::fill (fifo.begin(), fifo.end(), 0.0f);
             fifoIndex = 0;
             
-            // enable listenning
+            // Enable listenning
             listenning = true;
             
             // Resetting hann window phase
             sinOscForHann.setPhase (0.0f);
             
-            // Check if last grain was loud enough
+            // Check if last grain was loud enough, and whether or not to skip grain.
             if (grainMaxAbsSample > grainMaxAbsSampleThreshold && random.nextFloat() > _chanceToSkip)
             {
                 synthVolume = grainMaxAbsSample;
@@ -165,7 +168,7 @@ public:
     /**
      Method to also be called every sample.
      */
-    float processSynth()
+    float processSynth(float _oscillatorSelect)
     {
         if (synthIsPlaying)
         {
@@ -173,16 +176,16 @@ public:
             
             if (sampleCount < grainLengthInSamples)
             {
-                float synthSample = triOsc.process();
+                float synthSample = processOscillators (_oscillatorSelect, sinOsc, triOsc, sawOsc);
                 
-                if (sampleCount < envelopeShapeInSamples)
+                if (sampleCount < envelopeShapeInSamples - 1)
                 {
-                    return synthSample * synthVolume * 2.0f * sampleCount / float (grainLengthInSamples);
+                    return synthSample * tanhf (synthVolume * 2.0f * sampleCount / float (grainLengthInSamples));
                 }
                 
                 else
                 {
-                    return synthSample * synthVolume * (sampleCount * descentSlope + descentIntercept);
+                    return synthSample * tanhf (synthVolume * (sampleCount * descentSlope + descentIntercept));
                 }
             }
             else
@@ -240,6 +243,9 @@ private:
     
     // SYNTH PARAMETERS
     TriOsc triOsc;                                      // Synth oscillator
+    SineOsc sinOsc;                                     // Synth oscillator
+    AntiAliasSawToothOsc sawOsc;                        // Synth oscillator
+    
     float synthFrequency = 1.0f;
     int sampleCount = 0;
     bool synthIsPlaying = false;                        
@@ -299,15 +305,20 @@ private:
         }
         
         synthFrequency = index * indexMultiplierForFrequencyAquisition;
-        
+        float adjustedFreq = adjustedFrequency (synthFrequency, precision, freqA);
         
         //set it to the synth
-        triOsc.setFrequency (adjustedFrequency (synthFrequency, precision, freqA));
-
+        triOsc.setFrequency (adjustedFreq);
+        sinOsc.setFrequency (adjustedFreq);
+        sawOsc.setFrequency (adjustedFreq);
+        
+        
         // trigger the synth
         sampleCount = -1;               // Starts at -1 (not 0) because the += 1 happens at the start of the loop.
         setRealEnvelopeParams();
         synthIsPlaying = true;
-        triOsc.setPhase (0.25f);
+//        triOsc.setPhase (0.25f);
+//        sinOsc.setPhase (0.0f);
+//        sawOsc.setPhase (0.0f);
     }
 };

@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
 //==============================================================================
 TabboulehAudioProcessor::TabboulehAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -24,22 +25,24 @@ TabboulehAudioProcessor::TabboulehAudioProcessor()
 parameters(*this, nullptr, "ParameterTree", {
     
     // Parameters
-    std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", 1.0f, 4.99f, 2.0f),
-    std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", 0.0f, 1.0f, 0.3f),
+    std::make_unique<juce::AudioParameterFloat>("buffer_Size" ,"Bowl Size", juce::NormalisableRange<float>(0.5f, 4.99f, 0.01, 1.3), 2.0f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Randomisation" ,"Mama's Hands", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01, 0.6), 0.3f),
     std::make_unique<juce::AudioParameterFloat>("grain_Shape" ,"Parsley Shape", 0.0f, 1.0f, 0.6f),
-    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Chop Size", 0.020f, 0.5f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Length" ,"Parsley Chop", juce::NormalisableRange<float>(0.020f, 2.0f, 0.001, 0.45), 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("grain_Volume", "Parsley Amount", juce::NormalisableRange<float>(0.0f, 1.5f, 0.01, 0.8), 1.0f),
     std::make_unique<juce::AudioParameterFloat>("active_Grains" ,"Onion", 1.0f, 4.99f, 2.0f),
     std::make_unique<juce::AudioParameterFloat>("chanceToSkip_Grain" ,"Bourghol", 0.0f, 1.0f, 0.05f),
     std::make_unique<juce::AudioParameterFloat>("grain_StereoRandomness" ,"Spices", 0.0f, 1.0f, 0.2f),
-    std::make_unique<juce::AudioParameterFloat>("synth_Volume" ,"Tomato Size", 0.0f, 1.0f, 0.2f),
-    std::make_unique<juce::AudioParameterFloat>("synth_Envelope" ,"Tomato Cut", 0.01f, 0.99f, 0.1f),
+    std::make_unique<juce::AudioParameterFloat>("synth_Volume" ,"Tomato Amount", juce::NormalisableRange<float>(0.0f, 1.5f, 0.01, 0.8), 0.6f),
+    std::make_unique<juce::AudioParameterFloat>("synth_oscSelect" ,"Tomato Ripeness", 1.0f, 3.0f, 2.0f),
+    std::make_unique<juce::AudioParameterFloat>("synth_Envelope" ,"Tomato Shape", 0.01f, 0.99f, 0.1f),
     std::make_unique<juce::AudioParameterFloat>("synth_Volume_Threshold" ,"Tomato Age", juce::NormalisableRange<float>(0.01f, 0.90f, 0.01f, 0.35), 0.2f),
     std::make_unique<juce::AudioParameterFloat>("frequency_Precision" ,"Mint", 0.0f, 1.0f, 0.6f),
-    std::make_unique<juce::AudioParameterFloat>("highPass_Frequency" ,"Lemon", juce::NormalisableRange<float>(20.0f, 2500.f, 1.0f, 0.3), 100.0f),
+    std::make_unique<juce::AudioParameterFloat>("highPass_Frequency" ,"Lemon", juce::NormalisableRange<float>(20.0f, 2500.0f, 1.0f, 0.3), 100.0f),
     std::make_unique<juce::AudioParameterFloat>("reverb_Amount" ,"Oil", 0.0f, 0.99f, 0.4f),
-    std::make_unique<juce::AudioParameterFloat>("freqA" ,"Tuning: A = (Hz)", 400.0f, 500.0f, 440.0f),
-
-
+    std::make_unique<juce::AudioParameterFloat>("freqA" ,"Tuning: A = (Hz)", 400.0f, 500.0f, 440.0f)
+    
+    
 })
 {
     // Parameters
@@ -47,10 +50,12 @@ parameters(*this, nullptr, "ParameterTree", {
     grainRandomisationParam = parameters.getRawParameterValue("grain_Randomisation");
     grainShapeParam = parameters.getRawParameterValue("grain_Shape");
     grainLengthParam = parameters.getRawParameterValue("grain_Length");
+    grainVolumeParam = parameters.getRawParameterValue("grain_Volume");
     activeGrainsParam = parameters.getRawParameterValue("active_Grains");
     chanceToSkipGrainParam = parameters.getRawParameterValue("chanceToSkip_Grain");
     grainStereoRandomnessParam = parameters.getRawParameterValue("grain_StereoRandomness");
     synthVolumeParam = parameters.getRawParameterValue("synth_Volume");
+    synthOscillatorSelectParam = parameters.getRawParameterValue("synth_oscSelect");
     synthEnvelopeShapeParam = parameters.getRawParameterValue("synth_Envelope");
     synthVolumeThresholdParam = parameters.getRawParameterValue("synth_Volume_Threshold");
     frequencyPrecisionParam = parameters.getRawParameterValue("frequency_Precision");
@@ -186,18 +191,20 @@ void TabboulehAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             fftsynths[i].setEnvelopeParams(*synthEnvelopeShapeParam, *grainLengthParam);
             
             // Get the output of th synth:
-            float synthOut = fftsynths[i].processSynth() * *synthVolumeParam;
+            float synthOut = fftsynths[i].processSynth(*synthOscillatorSelectParam) * *synthVolumeParam;
             
             // Calculate the Left sample:
             float outGrainSampleL = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleL
                                     * grains[i].getStereoVolumeLeft()))
+                                    * *grainVolumeParam
                                     + (synthOut * fftsynths[i].getStereoVolumeLeft());
 
             // Calculate the Right sample:
             float outGrainSampleR = (((2.0f/float(*activeGrainsParam))
                                     * unprocessedGrainSampleR
                                     * grains[i].getStereoVolumeRight()))
+                                    * *grainVolumeParam
                                     + (synthOut * fftsynths[i].getStereoVolumeRight());
             
             // Add the L/R samples to the main output:
