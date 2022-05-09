@@ -167,6 +167,8 @@ public:
     
     /**
      Method to also be called every sample.
+     Takes an Oscillator select parameter:
+     @param _oscillatorSelect float bewteen [1-3], sliding between a sine, triangle and sawtooth respectively.
      */
     float processSynth(float _oscillatorSelect)
     {
