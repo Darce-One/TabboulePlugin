@@ -18,13 +18,12 @@ The user controllable parameters so far are:
 * Bourghol: Chance of omitted grains.
 * Spices: Panning randomness.
 * Tomato Amount: Volume of synths
-* Tomato Ripeness: Oscillator type
+* Tomato Colour: Oscillator type
 * Tomato shape: Synth envelope
-* Tomato Age: Tolerance level on FFTSynths
+* Tomato Ripeness: Tolerance level on FFTSynths
 * Mint: Tuning Accuracy to 12 tone.
 * Lemon: High pass filter on grains
 * Oil: Reverb
-* Fresh mint: Synth Quantize to 12 tone!
 * FreqA: Tuning parameter for synths.
 
 
@@ -47,3 +46,5 @@ parameters, such as FM synthesis to say the least.
 When running in the Plugin Host, changing the sampleRate results in a tuning
 error. That is because the prepare to play is not run at the start when
 changing the sample rate in that software.
+
+Changing the Onion Parameter in real time causes clicks.
